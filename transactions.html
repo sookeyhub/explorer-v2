@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TX List v2 — Stream + Visual Views</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ═══ Design Tokens v3 ═══ */
+:root {
+  --bg-0:#06070b;--bg-1:#0c0d14;--bg-2:#12131c;--bg-3:#191b27;--bg-4:#1f2233;
+  --bg-glass:rgba(18,19,28,0.72);--bg-glass-2:rgba(25,27,39,0.6);
+  --brand:#8000FF;--brand-light:#9933FF;--brand-dim:rgba(128,0,255,0.15);
+  --accent:#00C0FF;--accent-dim:rgba(0,192,255,0.12);
+  --success:#00C060;--success-dim:rgba(0,192,96,0.10);
+  --error:#FF4080;--error-dim:rgba(255,64,128,0.10);
+  --warning:#f59e0b;--warning-dim:rgba(245,158,11,0.10);
+  --info:#0060FF;--info-dim:rgba(0,96,255,0.10);
+  --t1:#f0f0ff;--t2:#8b8ea5;--t3:#4e5068;--t4:#2a2c3e;
+  --link:#0060FF;--border:rgba(255,255,255,0.06);--border-h:rgba(255,255,255,0.12);
+  --r-sm:4px;--r-md:8px;--r-lg:16px;--r-xl:16px;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',-apple-system,sans-serif;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.3);--shadow-md:0 4px 16px rgba(0,0,0,0.3);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.4);--shadow-glow:0 0 60px rgba(128,0,255,0.08);
+}
+[data-theme="light"]{
+  --bg-0:rgba(0,0,64,0.1);--bg-1:rgba(0,0,64,0.05);--bg-2:#ffffff;--bg-3:rgba(0,0,64,0.03);--bg-4:rgba(0,0,64,0.06);
+  --bg-glass:rgba(255,255,255,0.92);--bg-glass-2:rgba(255,255,255,0.7);
+  --brand:#8000FF;--brand-light:#7000E0;--brand-dim:rgba(128,0,255,0.08);
+  --accent:#00A0D0;--accent-dim:rgba(0,192,255,0.08);
+  --success:#00A050;--success-dim:rgba(0,192,96,0.08);
+  --error:#E03060;--error-dim:rgba(255,64,128,0.08);
+  --warning:#d97706;--warning-dim:rgba(217,119,6,0.08);
+  --info:#0050DD;--info-dim:rgba(0,96,255,0.08);
+  --t1:#000040;--t2:rgba(0,0,64,0.6);--t3:rgba(0,0,64,0.4);--t4:rgba(0,0,64,0.2);
+  --link:#0050DD;--border:rgba(240,243,247,1);--border-h:rgba(205,210,216,1);
+  --shadow-sm:0 1px 3px rgba(0,0,64,0.04);--shadow-md:0 4px 12px rgba(0,0,64,0.06);
+  --shadow-lg:0 8px 16px rgba(0,0,64,0.1);--shadow-glow:0 0 60px rgba(128,0,255,0.06);
+}
+
+/* ═══ Base ═══ */
+.theme-toggle svg{width:16px;height:16px;stroke-width:2}
+.search-bar svg.lucide{width:13px;height:13px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg-0);color:var(--t1);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;letter-spacing:0.01em}
+
+.bg-mesh{display:none}
+.bg-mesh::before{content:'';position:absolute;top:-20%;left:-10%;width:60%;height:60%;background:radial-gradient(ellipse at center,rgba(128,0,255,0.06) 0%,transparent 70%);animation:meshFloat 20s ease-in-out infinite}
+.bg-mesh::after{content:'';position:absolute;bottom:-20%;right:-10%;width:50%;height:50%;background:radial-gradient(ellipse at center,rgba(0,192,255,0.04) 0%,transparent 70%);animation:meshFloat 25s ease-in-out infinite reverse}
+@keyframes meshFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(5%,3%) scale(1.05)}66%{transform:translate(-3%,5%) scale(0.95)}}
+
+/* ═══ Header ═══ */
+.header{position:sticky;top:0;z-index:100;background:rgba(6,7,11,0.8);backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:24px}
+.logo{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;letter-spacing:-0.3px}
+.logo-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--brand),var(--accent));box-shadow:0 2px 12px rgba(128,0,255,0.3)}
+.nav{display:flex;gap:1px}
+.nav a{color:var(--t2);text-decoration:none;font-size:13px;font-weight:500;padding:6px 12px;border-radius:8px;transition:all .2s}
+.nav a:hover{color:var(--t1);background:rgba(255,255,255,0.04)}
+.nav a.active{color:var(--t1);background:rgba(255,255,255,0.06)}
+.header-right{display:flex;align-items:center;gap:8px}
+.search-bar{display:flex;align-items:center;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 12px;gap:8px;width:320px;transition:border-color .2s}
+.search-bar:focus-within{border-color:rgba(128,0,255,0.4)}
+.search-bar input{background:none;border:none;outline:none;color:var(--t1);font-size:12px;width:100%;font-family:var(--sans)}
+.search-bar input::placeholder{color:var(--t3)}
+.kbd{font-size:10px;color:var(--t3);background:var(--bg-0);padding:1px 5px;border-radius:3px;border:1px solid var(--border);font-weight:500}
+.net-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:var(--t2);padding:0 10px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg-2)}
+.net-dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 6px rgba(0,192,96,.5);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.h-btn{height:32px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--brand),#7000E0);color:#fff;font-size:12px;font-weight:600;padding:0 16px;cursor:pointer;font-family:var(--sans);transition:transform .15s,box-shadow .15s}
+.h-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(128,0,255,0.3)}
+
+.page{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:24px 32px 100px}
+.breadcrumb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3);margin-bottom:20px}
+.breadcrumb a{color:var(--t2);text-decoration:none;transition:color .15s}
+.breadcrumb a:hover{color:var(--brand-light)}
+
+.pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:16px;white-space:nowrap}
+.pill-success{background:var(--success-dim);color:var(--success)}
+.pill-warning{background:var(--warning-dim);color:var(--warning)}
+.pill-error{background:var(--error-dim);color:var(--error)}
+.pill-info{background:var(--info-dim);color:var(--info)}
+.pill-brand{background:var(--brand-dim);color:var(--brand-light)}
+.pill-neutral{background:rgba(255,255,255,0.04);color:var(--t2)}
+
+/* Method Tags (TX List 색상) */
+.method-tag{font-size:10px;font-weight:700;padding:4px 12px;border-radius:8px;display:inline-flex;align-items:center;gap:5px;backdrop-filter:blur(8px);white-space:nowrap}
+.method-tag svg.lucide{width:13px;height:13px}
+.tag-transfer{background:rgba(0,96,255,0.12);color:#0060FF;border:1px solid rgba(0,96,255,0.15)}
+.tag-swap{background:rgba(128,0,255,0.12);color:#8000FF;border:1px solid rgba(128,0,255,0.15)}
+.tag-bridge{background:rgba(0,192,96,0.12);color:#00C060;border:1px solid rgba(0,192,96,0.15)}
+.tag-approve{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.15)}
+.tag-unknown{background:rgba(100,116,139,0.12);color:#64748b;border:1px solid rgba(100,116,139,0.15)}
+
+/* Theme Toggle */
+.theme-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--bg-2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;overflow:hidden}
+.theme-toggle:hover{border-color:var(--border-h);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.theme-toggle .icon-sun,.theme-toggle .icon-moon{position:absolute;transition:transform .3s ease,opacity .3s ease}
+[data-theme="light"] .theme-toggle .icon-moon{transform:translateY(0);opacity:1}
+[data-theme="light"] .theme-toggle .icon-sun{transform:translateY(-30px);opacity:0}
+[data-theme="dark"] .theme-toggle .icon-sun{transform:translateY(0);opacity:1}
+[data-theme="dark"] .theme-toggle .icon-moon{transform:translateY(30px);opacity:0}
+:root .theme-toggle .icon-sun{transform:translateY(0);opacity:1}
+:root .theme-toggle .icon-moon{transform:translateY(30px);opacity:0}
+
+/* ═══════════════════════════════════════════
+   PAGE HERO + ACTIVITY PULSE (v2 신규)
+   ═══════════════════════════════════════════ */
+.page-hero{
+  background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:0;margin-bottom:16px;position:relative;overflow:hidden;
+}
+
+/* Activity Pulse 캔버스 */
+.pulse-canvas{
+  width:100%;height:80px;display:block;opacity:0.7;
+}
+
+.hero-content{padding:0 28px 20px;position:relative;z-index:1}
+.hero-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;margin-top:-8px}
+.hero-title-left{display:flex;align-items:center;gap:12px}
+.hero-title-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--brand-dim);color:var(--brand-light)}
+.hero-title-icon svg.lucide{width:20px;height:20px;stroke-width:2}
+.hero-title-text h1{font-size:22px;font-weight:800;letter-spacing:-0.5px}
+.hero-title-text p{font-size:12px;color:var(--t3);margin-top:1px}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--success);padding:6px 14px;border-radius:16px;background:var(--success-dim);border:1px solid rgba(0,192,96,0.15)}
+.live-badge .net-dot{width:6px;height:6px}
+
+/* Insight Bar (v2 신규) */
+.insight-bar{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:14px 18px;margin:0 0 16px;border-radius:var(--r-md);
+  background:linear-gradient(135deg,rgba(128,0,255,0.06),rgba(0,192,255,0.04));
+  border:1px solid rgba(128,0,255,0.1);
+}
+.insight-bar-icon{
+  width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:var(--brand-dim);color:var(--brand-light);flex-shrink:0;
+}
+.insight-bar-icon svg.lucide{width:16px;height:16px;stroke-width:2}
+.insight-bar-content{flex:1;min-width:0}
+.insight-bar-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--brand-light);margin-bottom:4px}
+.insight-bar-text{font-size:12px;color:var(--t2);line-height:1.6}
+.insight-bar-text strong{color:var(--t1);font-weight:700}
+
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.hero-stat{padding:14px 16px;border-radius:var(--r-md);background:var(--bg-3);border:1px solid rgba(255,255,255,0.03);transition:border-color .2s}
+.hero-stat:hover{border-color:var(--border-h)}
+.hero-stat-label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.hero-stat-value{font-size:16px;font-weight:800;letter-spacing:-0.5px;color:var(--t1);margin-bottom:2px}
+.hero-stat-sub{font-size:10px;color:var(--t3);font-weight:500;display:flex;align-items:center;gap:4px}
+.hero-stat-sub .up{color:var(--success)}
+.hero-total{font-size:12px;color:var(--t3);font-weight:500;padding-top:12px;border-top:1px solid var(--border)}
+.hero-total span{color:var(--t2);font-weight:600}
+
+/* ═══ Filter Bar ═══ */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.filter-pills{display:flex;align-items:center;gap:4px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-md);padding:4px}
+.filter-pills button{font-size:12px;font-weight:600;padding:7px 16px;border:none;background:none;border-radius:var(--r-sm);cursor:pointer;font-family:var(--sans);color:var(--t3);transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.filter-pills button.active{background:var(--brand-dim);color:var(--brand-light);box-shadow:inset 0 0 0 1px rgba(128,0,255,0.2)}
+.filter-pills button:hover:not(.active){color:var(--t2);background:rgba(255,255,255,0.03)}
+.filter-pills .fp-label{font-size:11px;color:var(--t3);margin-right:2px;font-weight:500;padding-left:6px}
+.method-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-transfer{background:#0060FF}.dot-swap{background:#8000FF}.dot-bridge{background:#00C060}.dot-approve{background:#f59e0b}
+.status-pills{display:flex;align-items:center;gap:4px;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-md);padding:4px}
+.status-pills button{font-size:12px;font-weight:600;padding:7px 16px;border:none;background:none;border-radius:var(--r-sm);cursor:pointer;font-family:var(--sans);color:var(--t3);transition:all .2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.status-pills button svg.lucide{width:12px;height:12px;stroke-width:3}
+.status-pills button.active{box-shadow:inset 0 0 0 1px rgba(128,0,255,0.2)}
+.status-pills button.sp-all.active{background:var(--brand-dim);color:var(--brand-light)}
+.status-pills button.sp-ok.active{background:var(--success-dim);color:var(--success)}
+.status-pills button.sp-fail.active{background:var(--error-dim);color:var(--error)}
+.status-pills button:hover:not(.active){color:var(--t2);background:rgba(255,255,255,0.03)}
+.filter-search{display:flex;align-items:center;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 12px;gap:8px;flex:1;min-width:200px;max-width:360px;transition:border-color .2s}
+.filter-search:focus-within{border-color:rgba(128,0,255,0.4)}
+.filter-search svg.lucide{width:13px;height:13px;color:var(--t3);flex-shrink:0}
+.filter-search input{background:none;border:none;outline:none;color:var(--t1);font-size:12px;width:100%;font-family:var(--sans)}
+.filter-search input::placeholder{color:var(--t3)}
+
+/* ═══════════════════════════════════════════
+   VIEW TOGGLE (v2 신규)
+   ═══════════════════════════════════════════ */
+.view-toggle{
+  display:flex;align-items:center;gap:4px;margin-bottom:16px;
+  background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-md);padding:4px;width:fit-content;
+}
+.view-toggle button{
+  font-size:12px;font-weight:600;padding:7px 18px;border:none;background:none;
+  border-radius:var(--r-sm);cursor:pointer;font-family:var(--sans);color:var(--t3);transition:all .2s;
+  display:flex;align-items:center;gap:6px;
+}
+.view-toggle button svg.lucide{width:14px;height:14px;stroke-width:2}
+.view-toggle button.active{background:var(--brand-dim);color:var(--brand-light);box-shadow:inset 0 0 0 1px rgba(128,0,255,0.2)}
+.view-toggle button:hover:not(.active){color:var(--t2);background:rgba(255,255,255,0.03)}
+
+/* 뷰 컨테이너 */
+.view-container{display:none}
+.view-container.active{display:block}
+
+/* ═══════════════════════════════════════════
+   TABLE VIEW (v1 재사용)
+   ═══════════════════════════════════════════ */
+.tx-table-wrap{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;margin-bottom:16px}
+.tx-table-header{display:grid;grid-template-columns:44px 1fr 200px;gap:0;padding:10px 20px;border-bottom:1px solid var(--border);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--t3)}
+.tx-table-header span:last-child{text-align:right}
+.tx-row{display:grid;grid-template-columns:44px 1fr 200px;gap:0;padding:14px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;position:relative}
+.tx-row:last-child{border-bottom:none}
+.tx-row:hover{background:rgba(128,0,255,0.03)}
+.tx-row:hover .tx-view-hint{opacity:1}
+.tx-row:hover .tx-copy-btn{opacity:1}
+.tx-row.tx-row-failed{background:rgba(255,64,128,0.03)}
+.tx-row.tx-row-failed:hover{background:rgba(255,64,128,0.06)}
+.tx-status{display:flex;align-items:flex-start;padding-top:2px}
+.tx-status-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.tx-status-icon svg.lucide{width:14px;height:14px;stroke-width:3}
+.tx-status-icon.status-ok{background:var(--success-dim);color:var(--success)}
+.tx-status-icon.status-fail{background:var(--error-dim);color:var(--error)}
+.tx-main{min-width:0}
+.tx-line1{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap}
+.tx-summary{font-size:13px;font-weight:600;color:var(--t1);letter-spacing:-0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.tx-row-failed .tx-summary{color:var(--error);opacity:0.9}
+.tx-age{font-size:11px;color:var(--t3);white-space:nowrap;flex-shrink:0}
+.tx-line2{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.tx-addr{font-family:var(--mono);font-size:11px;color:var(--t3);display:inline-flex;align-items:center;gap:4px}
+.tx-addr-label{color:var(--t2);font-family:var(--sans);font-weight:500;font-size:11px}
+.tx-addr svg.lucide{width:10px;height:10px;opacity:0.4}
+.tx-arrow{color:var(--t3);display:inline-flex;align-items:center}
+.tx-arrow svg.lucide{width:12px;height:12px;stroke-width:2}
+.tx-block{font-size:10px;color:var(--t3);font-family:var(--mono);margin-left:auto;white-space:nowrap}
+.tx-copy-btn{opacity:0;border:none;background:none;cursor:pointer;padding:2px;color:var(--t3);transition:opacity .15s,color .15s;display:inline-flex}
+.tx-copy-btn:hover{color:var(--brand-light)}
+.tx-copy-btn svg.lucide{width:10px;height:10px}
+.tx-view-hint{position:absolute;right:20px;top:50%;transform:translateY(-50%);opacity:0;transition:opacity .15s;font-size:11px;font-weight:600;color:var(--brand-light);display:flex;align-items:center;gap:4px;pointer-events:none}
+.tx-view-hint svg.lucide{width:12px;height:12px}
+.tx-value{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;min-width:0;padding-right:40px}
+.tx-value-primary{font-size:13px;font-weight:700;color:var(--t1);font-family:var(--mono);white-space:nowrap;letter-spacing:-0.3px}
+.tx-value-secondary{font-size:11px;color:var(--t3);white-space:nowrap}
+.tx-value-fee{font-size:10px;color:var(--t3);margin-top:1px}
+.tx-value-warn{color:var(--warning);font-weight:700}
+.tx-value-warn-icon{display:inline-flex;align-items:center;gap:3px}
+.tx-value-warn-icon svg.lucide{width:12px;height:12px}
+.tx-row-failed .tx-value-primary{opacity:0.5;text-decoration:line-through}
+
+/* ═══════════════════════════════════════════
+   STREAM VIEW (v2 신규)
+   ═══════════════════════════════════════════ */
+.stream-view{position:relative;padding-left:28px;margin-bottom:16px}
+
+/* 왼쪽 타임라인 선 */
+.stream-view::before{
+  content:'';position:absolute;left:11px;top:0;bottom:0;width:2px;
+  background:linear-gradient(to bottom,var(--brand-light),rgba(128,0,255,0.1));
+  border-radius:2px;
+}
+
+.stream-card{
+  position:relative;margin-bottom:12px;
+  background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;transition:border-color .2s, transform .15s;
+}
+.stream-card:hover{border-color:var(--border-h);transform:translateX(2px)}
+
+/* 타임라인 닷 */
+.stream-card::before{
+  content:'';position:absolute;left:-24px;top:22px;
+  width:10px;height:10px;border-radius:50%;
+  background:var(--brand);border:2px solid var(--bg-0);
+  box-shadow:0 0 8px rgba(128,0,255,0.3);z-index:2;
+}
+
+/* 그룹 카드 — 어드레스 기반 */
+.stream-group-header{
+  display:flex;align-items:center;gap:12px;padding:16px 20px 12px;
+}
+.stream-avatar{
+  width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.avatar-purple{background:linear-gradient(135deg,#8000FF,#6000C0)}
+.avatar-blue{background:linear-gradient(135deg,#0060FF,#0050DD)}
+.avatar-green{background:linear-gradient(135deg,#00C060,#00A050)}
+.avatar-red{background:linear-gradient(135deg,#FF4080,#E03060)}
+.avatar-amber{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.avatar-slate{background:linear-gradient(135deg,#64748b,#475569)}
+.avatar-icon{
+  width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.avatar-icon svg.lucide{width:18px;height:18px;stroke-width:2}
+.avatar-icon.icon-whale{background:var(--info-dim);color:var(--info)}
+.avatar-icon.icon-bridge{background:rgba(0,192,96,0.12);color:#00C060}
+.avatar-icon.icon-alert{background:var(--error-dim);color:var(--error)}
+.avatar-icon.icon-insight{background:var(--brand-dim);color:var(--brand-light)}
+
+.stream-group-info{flex:1;min-width:0}
+.stream-group-name{font-size:14px;font-weight:700;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px}
+.stream-group-name .pill{font-size:9px}
+.stream-group-sub{font-size:11px;color:var(--t3);margin-top:1px}
+.stream-group-meta{font-size:11px;color:var(--t3);white-space:nowrap;text-align:right}
+.stream-group-meta .count{font-weight:700;color:var(--t2)}
+
+/* 그룹 내 TX 타임라인 */
+.stream-txs{padding:0 20px 8px}
+.stream-tx-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;position:relative;
+}
+.stream-tx-item+.stream-tx-item{border-top:1px solid var(--border)}
+.stream-tx-dot{
+  width:8px;height:8px;border-radius:50%;margin-top:6px;flex-shrink:0;
+}
+.stream-tx-body{flex:1;min-width:0}
+.stream-tx-line1{display:flex;align-items:center;gap:8px;margin-bottom:2px}
+.stream-tx-summary{font-size:13px;font-weight:600;color:var(--t1);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stream-tx-value{font-size:12px;font-weight:700;font-family:var(--mono);color:var(--t1);white-space:nowrap}
+.stream-tx-line2{font-size:11px;color:var(--t3)}
+.stream-tx-item.failed .stream-tx-summary{color:var(--error)}
+.stream-tx-item.failed .stream-tx-value{opacity:0.5;text-decoration:line-through}
+
+/* 그룹 푸터 */
+.stream-group-footer{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 20px;border-top:1px solid var(--border);
+  font-size:11px;color:var(--t3);
+}
+.stream-group-footer strong{color:var(--t2);font-weight:700}
+
+/* 단일 TX 카드 (스트림) */
+.stream-single-body{
+  display:flex;align-items:center;gap:14px;padding:16px 20px;cursor:pointer;
+}
+.stream-single-body:hover .stream-single-hint{opacity:1}
+.stream-single-info{flex:1;min-width:0}
+.stream-single-line1{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.stream-single-summary{font-size:13px;font-weight:600;color:var(--t1)}
+.stream-single-line2{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:4px}
+.stream-single-line2 svg.lucide{width:10px;height:10px;opacity:0.4}
+.stream-single-value{text-align:right;white-space:nowrap}
+.stream-single-val{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--t1);letter-spacing:-0.3px}
+.stream-single-usd{font-size:10px;color:var(--t3)}
+.stream-single-hint{opacity:0;transition:opacity .15s;font-size:10px;color:var(--brand-light);font-weight:600;margin-top:2px}
+.stream-card-failed{background:rgba(255,64,128,0.03)}
+.stream-card-failed .stream-single-summary{color:var(--error)}
+.stream-card-failed .stream-single-val{opacity:0.5;text-decoration:line-through}
+.stream-card-failed::before{background:var(--error);box-shadow:0 0 8px rgba(255,64,128,0.3)}
+
+/* Insight 카드 (스트림) */
+.stream-insight{border-left:3px solid var(--brand)}
+.stream-insight::before{background:var(--brand-light)}
+.stream-alert{border-left:3px solid var(--error)}
+.stream-alert::before{background:var(--error);box-shadow:0 0 8px rgba(255,64,128,0.3)}
+.stream-whale{border-left:3px solid var(--info)}
+.stream-whale::before{background:var(--info);box-shadow:0 0 8px rgba(0,96,255,0.3)}
+.stream-bridge-group{border-left:3px solid #00C060}
+.stream-bridge-group::before{background:#00C060;box-shadow:0 0 8px rgba(0,192,96,0.3)}
+
+/* ═══════════════════════════════════════════
+   VISUAL VIEW (v2 신규) — Bubble Scatter
+   ═══════════════════════════════════════════ */
+.visual-view{margin-bottom:16px}
+.visual-container{
+  position:relative;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-xl);
+  height:380px;overflow:hidden;
+}
+.visual-axis{
+  position:absolute;bottom:0;left:0;right:0;height:36px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;font-size:10px;color:var(--t3);font-weight:500;
+  border-top:1px solid var(--border);background:var(--bg-glass);backdrop-filter:blur(8px);
+}
+.visual-dot{
+  position:absolute;border-radius:50%;cursor:pointer;
+  transition:transform .2s,box-shadow .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+.visual-dot:hover{transform:scale(1.4);z-index:10}
+.visual-dot.vd-transfer{background:rgba(0,96,255,0.35);border:2px solid rgba(0,96,255,0.6);box-shadow:0 0 12px rgba(0,96,255,0.2)}
+.visual-dot.vd-swap{background:rgba(128,0,255,0.35);border:2px solid rgba(128,0,255,0.6);box-shadow:0 0 12px rgba(128,0,255,0.2)}
+.visual-dot.vd-bridge{background:rgba(0,192,96,0.35);border:2px solid rgba(0,192,96,0.6);box-shadow:0 0 12px rgba(0,192,96,0.2)}
+.visual-dot.vd-approve{background:rgba(245,158,11,0.35);border:2px solid rgba(245,158,11,0.6);box-shadow:0 0 12px rgba(245,158,11,0.2)}
+.visual-dot:hover{box-shadow:0 0 24px currentColor}
+.visual-dot.vd-failed{opacity:0.4;border-style:dashed}
+
+/* 호버 툴팁 */
+.visual-tooltip{
+  display:none;position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
+  background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);
+  padding:10px 14px;white-space:nowrap;z-index:100;box-shadow:var(--shadow-lg);
+  pointer-events:none;
+}
+.visual-dot:hover .visual-tooltip{display:block}
+.visual-tooltip-summary{font-size:12px;font-weight:600;margin-bottom:2px}
+.visual-tooltip-value{font-size:11px;color:var(--t2);font-family:var(--mono)}
+.visual-tooltip-time{font-size:10px;color:var(--t3)}
+
+/* 범례 */
+.visual-legend{
+  display:flex;align-items:center;gap:16px;justify-content:center;
+  padding:12px;font-size:11px;color:var(--t3);font-weight:500;
+}
+.visual-legend-item{display:flex;align-items:center;gap:5px}
+.visual-legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* 그리드 라인 */
+.visual-grid-line{
+  position:absolute;top:0;bottom:36px;width:1px;
+  background:var(--border);
+}
+
+/* ═══ Pagination ═══ */
+.pagination-wrap{display:flex;align-items:center;justify-content:space-between;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 20px;gap:16px;flex-wrap:wrap}
+.pagination-info{font-size:12px;color:var(--t2);font-weight:500;white-space:nowrap}
+.pagination-info span{color:var(--t1);font-weight:700}
+.pagination-btns{display:flex;align-items:center;gap:4px}
+.page-btn{min-width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:none;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--t3);display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0 8px}
+.page-btn:hover{color:var(--t1);background:rgba(255,255,255,0.04);border-color:var(--border-h)}
+.page-btn.active{background:var(--brand-dim);color:var(--brand-light);border-color:rgba(128,0,255,0.2)}
+.page-btn:disabled{opacity:0.3;cursor:not-allowed}
+.page-btn svg.lucide{width:14px;height:14px;stroke-width:2.5}
+.page-dots{font-size:12px;color:var(--t3);padding:0 4px}
+.per-page{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t3);white-space:nowrap}
+.per-page select{background:var(--bg-3);border:1px solid var(--border);border-radius:6px;color:var(--t1);font-size:12px;font-weight:600;padding:4px 8px;font-family:var(--sans);cursor:pointer;outline:none}
+
+.no-results{display:none;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;text-align:center}
+.no-results.show{display:flex}
+.no-results svg.lucide{width:36px;height:36px;stroke-width:1.5;color:var(--t3);margin-bottom:12px}
+.no-results p{font-size:13px;color:var(--t3);font-weight:500}
+
+/* ═══ Light Theme Overrides ═══ */
+[data-theme="light"] body{background:var(--bg-0)}
+[data-theme="light"] .bg-mesh::before{background:radial-gradient(ellipse at center,rgba(128,0,255,0.04) 0%,transparent 70%)}
+[data-theme="light"] .bg-mesh::after{background:radial-gradient(ellipse at center,rgba(0,192,255,0.03) 0%,transparent 70%)}
+[data-theme="light"] .header{background:rgb(255,255,255);backdrop-filter:none;height:72px;border-bottom:1px solid #F0F3F7}
+[data-theme="light"] .search-bar{background:var(--bg-3);border-radius:8px;border:1px solid #CDD2D8}
+[data-theme="light"] .kbd{background:var(--bg-4);border-color:var(--border);color:var(--t3)}
+[data-theme="light"] .net-badge{background:var(--bg-2)}
+[data-theme="light"] .page-hero{background:var(--bg-2);box-shadow:var(--shadow-sm)}
+[data-theme="light"] .hero-stat{background:var(--bg-3);border-color:rgba(0,0,0,0.04)}
+[data-theme="light"] .insight-bar{background:linear-gradient(135deg,rgba(128,0,255,0.04),rgba(0,192,255,0.03));border-color:rgba(128,0,255,0.1)}
+[data-theme="light"] .filter-pills{background:var(--bg-3)}
+[data-theme="light"] .filter-pills button.active{background:rgba(128,0,255,0.1);color:var(--brand)}
+[data-theme="light"] .filter-pills button:hover:not(.active){background:rgba(0,0,0,0.03)}
+[data-theme="light"] .status-pills{background:var(--bg-3)}
+[data-theme="light"] .status-pills button:hover:not(.active){background:rgba(0,0,0,0.03)}
+[data-theme="light"] .filter-search{background:var(--bg-3)}
+[data-theme="light"] .view-toggle{background:var(--bg-3)}
+[data-theme="light"] .view-toggle button.active{background:rgba(128,0,255,0.1);color:var(--brand)}
+[data-theme="light"] .view-toggle button:hover:not(.active){background:rgba(0,0,0,0.03)}
+[data-theme="light"] .tx-table-wrap{background:var(--bg-2);box-shadow:var(--shadow-sm)}
+[data-theme="light"] .tx-row:hover{background:rgba(128,0,255,0.03)}
+[data-theme="light"] .tx-row-failed{background:rgba(224,48,96,0.03)}
+[data-theme="light"] .stream-card{background:var(--bg-2);box-shadow:var(--shadow-sm)}
+[data-theme="light"] .stream-card::before{border-color:var(--bg-0)}
+[data-theme="light"] .stream-view::before{background:linear-gradient(to bottom,var(--brand),rgba(128,0,255,0.1))}
+[data-theme="light"] .stream-tx-item+.stream-tx-item{border-top-color:rgba(0,0,0,0.06)}
+[data-theme="light"] .stream-group-footer{border-top-color:rgba(0,0,0,0.06)}
+[data-theme="light"] .visual-container{background:var(--bg-2);box-shadow:var(--shadow-sm)}
+[data-theme="light"] .visual-axis{background:rgba(255,255,255,0.9)}
+[data-theme="light"] .visual-tooltip{background:var(--bg-2);box-shadow:var(--shadow-md)}
+[data-theme="light"] .pagination-wrap{background:var(--bg-2);box-shadow:var(--shadow-sm)}
+[data-theme="light"] .page-btn:hover{background:rgba(0,0,0,0.04)}
+[data-theme="light"] .per-page select{background:var(--bg-3)}
+[data-theme="light"] .pill-neutral{background:rgba(0,0,0,0.04);color:var(--t2)}
+
+/* ═══ Responsive ═══ */
+@media(max-width:1100px){
+  .hero-stats{grid-template-columns:repeat(2,1fr)}
+  .tx-table-header,.tx-row{grid-template-columns:44px 1fr 160px}
+  .tx-block{display:none}
+}
+@media(max-width:700px){
+  .page{padding:16px}
+  .hero-stats{grid-template-columns:repeat(2,1fr)}
+  .search-bar,.nav,.net-badge{display:none}
+  .header{padding:0 16px}
+  .filter-bar{gap:8px}
+  .filter-pills{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-shrink:0}
+  .filter-search{max-width:100%;min-width:0}
+  .visual-container{height:260px}
+  .stream-view{padding-left:20px}
+  .stream-view::before{left:7px}
+  .stream-card::before{left:-16px;width:8px;height:8px}
+}
+.tx-table-body{transition:opacity .2s ease}
+.tx-table-body.filtering{opacity:0.5}
+@keyframes fadeOut{0%{opacity:1;transform:translateX(-50%) translateY(0)}70%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-10px)}}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo"><div class="logo-icon">E</div>Explorer</div>
+    <nav class="nav">
+      <a href="transactions.html" class="active">Transactions</a><a href="swap.html">Swap</a><a href="block-detail.html">Blocks</a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <div class="search-bar"><i data-lucide="search"></i><input placeholder="Search by address, tx hash, block, token..."><span class="kbd">&#x2318;K</span></div>
+    <div class="net-badge"><span class="net-dot"></span>Ethereum Mainnet</div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme"><span class="icon-sun"><i data-lucide="sun"></i></span><span class="icon-moon"><i data-lucide="moon"></i></span></button>
+    <button class="h-btn">Connect Wallet</button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="breadcrumb"><a href="#">Home</a><span>›</span><span style="color:var(--t2)">Transactions</span></div>
+
+  <!-- ═══ Page Hero + Pulse ═══ -->
+  <div class="page-hero">
+    <canvas class="pulse-canvas" id="pulseCanvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-title-row">
+        <div class="hero-title-left">
+          <div class="hero-title-icon"><i data-lucide="activity"></i></div>
+          <div class="hero-title-text"><h1>Transactions</h1><p>Ethereum Mainnet network activity</p></div>
+        </div>
+        <div class="live-badge"><span class="net-dot"></span>Live</div>
+      </div>
+
+      <!-- Insight Bar -->
+      <div class="insight-bar">
+        <div class="insight-bar-icon"><i data-lucide="sparkles"></i></div>
+        <div class="insight-bar-content">
+          <div class="insight-bar-label">Network Insight</div>
+          <div class="insight-bar-text">Swap activity is <strong>3x higher</strong> than usual. Top destination: <strong>Lido</strong> receives 23% of transactions. <strong>3 whale transfers</strong> (>10 ETH) detected in the last hour.</div>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="hero-stat-label">24H Transactions</div><div class="hero-stat-value">2,027,183</div><div class="hero-stat-sub"><span class="up">+3.2% ↑</span></div></div>
+        <div class="hero-stat"><div class="hero-stat-label">Pending</div><div class="hero-stat-value">119,145</div><div class="hero-stat-sub">Normal</div></div>
+        <div class="hero-stat"><div class="hero-stat-label">Avg Fee</div><div class="hero-stat-value">$0.14</div><div class="hero-stat-sub"><span class="pill pill-success">Very Low</span></div></div>
+        <div class="hero-stat"><div class="hero-stat-label">TPS</div><div class="hero-stat-value">15.2</div><div class="hero-stat-sub">tx/sec</div></div>
+      </div>
+      <div class="hero-total">Total: More than <span>3.28B</span> transactions found</div>
+    </div>
+  </div>
+
+  <!-- ═══ Filter Bar ═══ -->
+  <div class="filter-bar">
+    <div class="filter-pills" id="methodFilter">
+      <span class="fp-label">Method</span>
+      <button class="active" data-method="all" onclick="filterMethod('all',this)">All</button>
+      <button data-method="transfer" onclick="filterMethod('transfer',this)"><span class="method-dot dot-transfer"></span>Transfer</button>
+      <button data-method="swap" onclick="filterMethod('swap',this)"><span class="method-dot dot-swap"></span>Swap</button>
+      <button data-method="bridge" onclick="filterMethod('bridge',this)"><span class="method-dot dot-bridge"></span>Bridge</button>
+      <button data-method="approve" onclick="filterMethod('approve',this)"><span class="method-dot dot-approve"></span>Approve</button>
+    </div>
+    <div class="status-pills" id="statusFilter">
+      <button class="sp-all active" data-status="all" onclick="filterStatus('all',this)">All</button>
+      <button class="sp-ok" data-status="success" onclick="filterStatus('success',this)"><i data-lucide="check"></i>Success</button>
+      <button class="sp-fail" data-status="failed" onclick="filterStatus('failed',this)"><i data-lucide="x"></i>Failed</button>
+    </div>
+    <div class="filter-search"><i data-lucide="search"></i><input id="searchInput" placeholder="Filter by hash, address, block..." oninput="handleSearch(this.value)"></div>
+  </div>
+
+  <!-- ═══ View Toggle ═══ -->
+  <div class="view-toggle" id="viewToggle">
+    <button class="active" onclick="switchView('table',this)"><i data-lucide="list"></i>Table</button>
+    <button onclick="switchView('stream',this)"><i data-lucide="newspaper"></i>Stream</button>
+    <button onclick="switchView('visual',this)"><i data-lucide="scatter-chart"></i>Visual</button>
+  </div>
+
+  <!-- ═══ TABLE VIEW ═══ -->
+  <div class="view-container active" id="view-table">
+    <div class="tx-table-wrap">
+      <div class="tx-table-header"><span></span><span>Transaction</span><span>Value</span></div>
+      <div class="tx-table-body" id="txTableBody"></div>
+      <div class="no-results" id="noResultsTable"><i data-lucide="search-x"></i><p>No transactions found matching your filters</p></div>
+    </div>
+  </div>
+
+  <!-- ═══ STREAM VIEW ═══ -->
+  <div class="view-container" id="view-stream">
+    <div class="stream-view" id="streamBody"></div>
+    <div class="no-results" id="noResultsStream"><i data-lucide="search-x"></i><p>No transactions found matching your filters</p></div>
+  </div>
+
+  <!-- ═══ VISUAL VIEW ═══ -->
+  <div class="view-container" id="view-visual">
+    <div class="visual-view">
+      <div class="visual-container" id="visualContainer">
+        <div class="visual-grid-line" style="left:20%"></div>
+        <div class="visual-grid-line" style="left:40%"></div>
+        <div class="visual-grid-line" style="left:60%"></div>
+        <div class="visual-grid-line" style="left:80%"></div>
+        <div class="visual-axis">
+          <span>48m ago</span><span>36m ago</span><span>24m ago</span><span>12m ago</span><span>Now</span>
+        </div>
+      </div>
+      <div class="visual-legend">
+        <div class="visual-legend-item"><span class="visual-legend-dot" style="background:#0060FF"></span>Transfer</div>
+        <div class="visual-legend-item"><span class="visual-legend-dot" style="background:#8000FF"></span>Swap</div>
+        <div class="visual-legend-item"><span class="visual-legend-dot" style="background:#00C060"></span>Bridge</div>
+        <div class="visual-legend-item"><span class="visual-legend-dot" style="background:#f59e0b"></span>Approve</div>
+        <span style="color:var(--t3);font-size:10px;margin-left:8px">Size = Transaction Value</span>
+      </div>
+      <div class="no-results" id="noResultsVisual"><i data-lucide="search-x"></i><p>No transactions found matching your filters</p></div>
+    </div>
+  </div>
+
+  <!-- ═══ Pagination ═══ -->
+  <div class="pagination-wrap">
+    <div class="pagination-info">Showing <span>1–12</span> of <span>3,285,477</span></div>
+    <div class="pagination-btns">
+      <button class="page-btn" disabled><i data-lucide="chevrons-left"></i></button>
+      <button class="page-btn" disabled><i data-lucide="chevron-left"></i></button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <span class="page-dots">...</span>
+      <button class="page-btn">131,419</button>
+      <button class="page-btn"><i data-lucide="chevron-right"></i></button>
+      <button class="page-btn"><i data-lucide="chevrons-right"></i></button>
+    </div>
+    <div class="per-page">Per page<select><option>25</option><option>50</option><option>100</option></select></div>
+  </div>
+</main>
+
+<script>
+// ═══ Mock 데이터 ═══
+const TX_DATA = [
+  { id:1, method:'transfer', status:'success', hash:'0xe1dd93...c15126', from:{addr:'0x4838…d5f97',label:'Titan Builder',type:'eoa'}, to:{addr:'0x388c…9097',label:'Lido',type:'contract'}, summary:'Sent ETH to Lido Rewards Vault', value:'0.00862 ETH', usd:'$16.80', fee:'$0.005', age:'3m ago', block:'#24430888', ageMin:3, valNum:16.8 },
+  { id:2, method:'swap', status:'success', hash:'0x7a2b44...e83201', from:{addr:'0x7f2c…a1b3',label:'vitalik.eth',type:'eoa'}, to:{addr:'0x6b17…c4d5',label:'Uniswap V3',type:'contract'}, summary:'Swapped 1,500 USDC for 0.82 ETH on Uniswap', value:'0.82 ETH', usd:'$1,596.90', fee:'$2.34', age:'5m ago', block:'#24430885', ageMin:5, valNum:1596.9 },
+  { id:3, method:'bridge', status:'success', hash:'0x3c8d12...f47890', from:{addr:'0x9a1b…c2d3',label:'',type:'eoa'}, to:{addr:'0xb2c3…d4e5',label:'Arbitrum Bridge',type:'contract'}, summary:'Bridged 500 USDT to Arbitrum', value:'500 USDT', usd:'$500.00', fee:'$0.89', age:'8m ago', block:'#24430880', ageMin:8, valNum:500 },
+  { id:4, method:'approve', status:'success', hash:'0x9f1e56...a23b78', from:{addr:'0x7f2c…a1b3',label:'vitalik.eth',type:'eoa'}, to:{addr:'0x6b17…c4d5',label:'Uniswap V3',type:'contract'}, summary:'Approved USDT for Uniswap V3', value:'Unlimited', usd:'', fee:'$0.12', age:'12m ago', block:'#24430872', ageMin:12, valNum:0, isUnlimited:true },
+  { id:5, method:'transfer', status:'failed', hash:'0x5d4c23...b67e90', from:{addr:'0xd2e1…f3a2',label:'',type:'eoa'}, to:{addr:'0xf3a2…b4c5',label:'',type:'eoa'}, summary:'Failed: Out of Gas', value:'0 ETH', usd:'', fee:'$0.003', age:'15m ago', block:'#24430865', ageMin:15, valNum:0 },
+  { id:6, method:'swap', status:'failed', hash:'0x2b9a78...d12345', from:{addr:'0xa1b2…c3d4',label:'',type:'eoa'}, to:{addr:'0xc3d4…e5f6',label:'SushiSwap',type:'contract'}, summary:'Failed: Slippage Too High', value:'0', usd:'', fee:'$1.56', age:'18m ago', block:'#24430860', ageMin:18, valNum:0 },
+  { id:7, method:'bridge', status:'failed', hash:'0x8e7f34...a56b12', from:{addr:'0xe5f6…a7b8',label:'',type:'eoa'}, to:{addr:'0xd4e5…f6a7',label:'Optimism Bridge',type:'contract'}, summary:'Failed: Insufficient Balance', value:'1,000 USDC', usd:'$1,000.00', fee:'$0.45', age:'22m ago', block:'#24430855', ageMin:22, valNum:1000 },
+  { id:8, method:'approve', status:'failed', hash:'0x1a2b3c...4d5e6f', from:{addr:'0x1234…5678',label:'',type:'eoa'}, to:{addr:'0x5678…9abc',label:'Aave V3',type:'contract'}, summary:'Failed: Reverted', value:'10,000 DAI', usd:'$10,000.00', fee:'$0.32', age:'25m ago', block:'#24430850', ageMin:25, valNum:10000 },
+  { id:9, method:'transfer', status:'success', hash:'0x4f5e6d...7a8b9c', from:{addr:'0xab12…cd34',label:'OpenSea',type:'contract'}, to:{addr:'0xcd34…ef56',label:'',type:'eoa'}, summary:'Sent 2.5 ETH', value:'2.5 ETH', usd:'$4,869.80', fee:'$0.78', age:'30m ago', block:'#24430842', ageMin:30, valNum:4869.8 },
+  { id:10, method:'swap', status:'success', hash:'0x6a7b8c...9d0e1f', from:{addr:'0xef56…a789',label:'',type:'eoa'}, to:{addr:'0x7890…bcde',label:'Curve',type:'contract'}, summary:'Swapped 10,000 DAI for 9,985 USDC on Curve', value:'9,985 USDC', usd:'$9,985.00', fee:'$1.23', age:'35m ago', block:'#24430835', ageMin:35, valNum:9985 },
+  { id:11, method:'transfer', status:'success', hash:'0xbc1234...de5678', from:{addr:'0x1a2b…3c4d',label:'Binance',type:'contract'}, to:{addr:'0x3c4d…5e6f',label:'',type:'eoa'}, summary:'Sent 50 ETH from Binance', value:'50 ETH', usd:'$97,396', fee:'$0.45', age:'42m ago', block:'#24430820', ageMin:42, valNum:97396 },
+  { id:12, method:'approve', status:'success', hash:'0xef9012...345678', from:{addr:'0x5e6f…7a8b',label:'',type:'eoa'}, to:{addr:'0xab12…cd34',label:'OpenSea',type:'contract'}, summary:'Approved NFT for OpenSea', value:'1 NFT', usd:'ERC-721', fee:'$0.09', age:'48m ago', block:'#24430810', ageMin:48, valNum:10 }
+];
+
+const METHOD_CONFIG = {
+  transfer:{icon:'arrow-up-right',tag:'tag-transfer',label:'Transfer',color:'#0060FF'},
+  swap:{icon:'arrow-left-right',tag:'tag-swap',label:'Swap',color:'#8000FF'},
+  bridge:{icon:'globe',tag:'tag-bridge',label:'Bridge',color:'#00C060'},
+  approve:{icon:'shield-check',tag:'tag-approve',label:'Approve',color:'#f59e0b'},
+  unknown:{icon:'file-question',tag:'tag-unknown',label:'Unknown',color:'#64748b'}
+};
+
+// 스트림 뷰 그룹 정의
+const STREAM_GROUPS = [
+  {
+    type:'address-group', avatar:'V', avatarClass:'avatar-purple',
+    name:'vitalik.eth', tag:'DeFi Active', tagClass:'pill-brand',
+    sub:'2 DeFi actions in the last 12 minutes', timeRange:'5–12m ago',
+    txIds:[2,4], footer:'Net: <strong>+0.82 ETH</strong> received · Total fees: $2.46'
+  },
+  { type:'single', txId:1 },
+  {
+    type:'pattern-group', groupClass:'stream-whale',
+    iconClass:'icon-whale', icon:'trending-up',
+    name:'Whale Movements', tag:'2 transfers', tagClass:'pill-info',
+    sub:'Large value transfers detected', timeRange:'30–42m ago',
+    txIds:[11,9], footer:'Total moved: <strong>$102,265.80</strong>'
+  },
+  { type:'single', txId:3 },
+  { type:'single', txId:10 },
+  {
+    type:'pattern-group', groupClass:'stream-alert',
+    iconClass:'icon-alert', icon:'alert-triangle',
+    name:'Failed Transactions', tag:'4 failures', tagClass:'pill-error',
+    sub:'Multiple failures in the last hour', timeRange:'15–25m ago',
+    txIds:[5,6,7,8], footer:'Total gas wasted: <strong>$2.33</strong>'
+  },
+  { type:'single', txId:12 }
+];
+
+// ═══ 필터 상태 ═══
+let currentMethod = 'all';
+let currentStatus = 'all';
+let currentSearch = '';
+let currentView = 'table';
+
+function getFilteredData() {
+  return TX_DATA.filter(tx => {
+    if (currentMethod !== 'all' && tx.method !== currentMethod) return false;
+    if (currentStatus !== 'all' && tx.status !== currentStatus) return false;
+    if (currentSearch) {
+      const s = (tx.hash+' '+tx.from.addr+' '+tx.from.label+' '+tx.to.addr+' '+tx.to.label+' '+tx.block+' '+tx.summary).toLowerCase();
+      if (!s.includes(currentSearch.toLowerCase())) return false;
+    }
+    return true;
+  });
+}
+
+// ═══ TABLE VIEW 렌더링 ═══
+function formatAddr(info) {
+  const icon = info.type==='contract'?'file-code-2':'user';
+  const label = info.label?`<span class="tx-addr-label">(${info.label})</span>`:'';
+  return `<span class="tx-addr"><i data-lucide="${icon}"></i><span>${info.addr}</span>${label}</span>`;
+}
+function renderValueHtml(tx) {
+  if (tx.isUnlimited) return `<span class="tx-value-primary tx-value-warn"><span class="tx-value-warn-icon"><i data-lucide="alert-triangle"></i>Unlimited</span></span><span class="tx-value-secondary">Token Approval</span><span class="tx-value-fee">Fee ${tx.fee}</span>`;
+  const usd = tx.usd?`<span class="tx-value-secondary">${tx.usd}</span>`:'';
+  return `<span class="tx-value-primary">${tx.value}</span>${usd}<span class="tx-value-fee">Fee ${tx.fee}</span>`;
+}
+function renderRow(tx) {
+  const cfg = METHOD_CONFIG[tx.method];
+  const fail = tx.status==='failed';
+  return `<div class="tx-row${fail?' tx-row-failed':''}" data-method="${tx.method}" data-status="${tx.status}">
+    <div class="tx-status"><div class="tx-status-icon ${fail?'status-fail':'status-ok'}"><i data-lucide="${fail?'x':'check'}"></i></div></div>
+    <div class="tx-main">
+      <div class="tx-line1"><span class="method-tag ${cfg.tag}"><i data-lucide="${cfg.icon}"></i>${cfg.label}</span><span class="tx-summary">${tx.summary}</span><span class="tx-age">${tx.age}</span></div>
+      <div class="tx-line2">${formatAddr(tx.from)}<span class="tx-arrow"><i data-lucide="arrow-right"></i></span>${formatAddr(tx.to)}<button class="tx-copy-btn" title="Copy TX Hash" onclick="event.stopPropagation();copyText('${tx.hash}')"><i data-lucide="copy"></i></button><span class="tx-block">${tx.block}</span></div>
+    </div>
+    <div class="tx-value">${renderValueHtml(tx)}</div>
+    <div class="tx-view-hint"><i data-lucide="arrow-right"></i>View</div>
+  </div>`;
+}
+function renderTable() {
+  const filtered = getFilteredData();
+  const body = document.getElementById('txTableBody');
+  const nr = document.getElementById('noResultsTable');
+  if (!filtered.length) { body.innerHTML=''; nr.classList.add('show'); }
+  else { nr.classList.remove('show'); body.innerHTML = filtered.map(renderRow).join(''); }
+}
+
+// ═══ STREAM VIEW 렌더링 ═══
+function renderStreamTxItem(tx) {
+  const cfg = METHOD_CONFIG[tx.method];
+  const fail = tx.status==='failed';
+  const valStr = tx.isUnlimited?'<span style="color:var(--warning)">Unlimited ⚠</span>':(tx.usd?`${tx.value} · ${tx.usd}`:tx.value);
+  return `<div class="stream-tx-item${fail?' failed':''}">
+    <span class="stream-tx-dot" style="background:${cfg.color}"></span>
+    <div class="stream-tx-body">
+      <div class="stream-tx-line1">
+        <span class="method-tag ${cfg.tag}" style="font-size:10px;padding:2px 8px"><i data-lucide="${cfg.icon}"></i>${cfg.label}</span>
+        <span class="stream-tx-summary">${tx.summary}</span>
+        <span class="stream-tx-value">${fail?'<s style="opacity:0.5">'+tx.value+'</s>':valStr}</span>
+      </div>
+      <div class="stream-tx-line2">${tx.from.addr}${tx.from.label?' ('+tx.from.label+')':''} → ${tx.to.addr}${tx.to.label?' ('+tx.to.label+')':''}</div>
+    </div>
+  </div>`;
+}
+
+function renderStreamSingle(tx) {
+  const cfg = METHOD_CONFIG[tx.method];
+  const fail = tx.status==='failed';
+  const valDisplay = tx.isUnlimited?'<span style="color:var(--warning)">Unlimited ⚠</span>':tx.value;
+  const usdDisplay = tx.isUnlimited?'Token Approval':(tx.usd||'');
+  return `<div class="stream-card${fail?' stream-card-failed':''}">
+    <div class="stream-single-body">
+      <div class="tx-status-icon ${fail?'status-fail':'status-ok'}"><i data-lucide="${fail?'x':'check'}"></i></div>
+      <div class="stream-single-info">
+        <div class="stream-single-line1">
+          <span class="method-tag ${cfg.tag}" style="font-size:10px;padding:3px 10px"><i data-lucide="${cfg.icon}"></i>${cfg.label}</span>
+          <span class="stream-single-summary">${tx.summary}</span>
+        </div>
+        <div class="stream-single-line2">
+          <i data-lucide="${tx.from.type==='contract'?'file-code-2':'user'}"></i>
+          ${tx.from.addr}${tx.from.label?' ('+tx.from.label+')':''}
+          <i data-lucide="arrow-right" style="width:10px;height:10px"></i>
+          ${tx.to.addr}${tx.to.label?' ('+tx.to.label+')':''}
+          · ${tx.age}
+        </div>
+      </div>
+      <div class="stream-single-value">
+        <div class="stream-single-val">${fail?'<s style="opacity:0.5">'+tx.value+'</s>':valDisplay}</div>
+        <div class="stream-single-usd">${usdDisplay}</div>
+        <div class="stream-single-hint">View →</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderStream() {
+  const filtered = getFilteredData();
+  const filteredIds = new Set(filtered.map(t => t.id));
+  const container = document.getElementById('streamBody');
+  const nr = document.getElementById('noResultsStream');
+  let html = '';
+
+  for (const group of STREAM_GROUPS) {
+    if (group.type === 'single') {
+      const tx = TX_DATA.find(t => t.id === group.txId);
+      if (!tx || !filteredIds.has(tx.id)) continue;
+      html += renderStreamSingle(tx);
+    } else {
+      // 그룹 내 TX 중 필터 통과한 것만
+      const groupTxs = group.txIds.map(id => TX_DATA.find(t => t.id===id)).filter(t => t && filteredIds.has(t.id));
+      if (!groupTxs.length) continue;
+
+      const isAlert = group.groupClass === 'stream-alert';
+      const isWhale = group.groupClass === 'stream-whale';
+      const cardClass = group.groupClass || '';
+
+      html += `<div class="stream-card ${cardClass}">
+        <div class="stream-group-header">
+          ${group.avatar
+            ? `<div class="stream-avatar ${group.avatarClass}">${group.avatar}</div>`
+            : `<div class="avatar-icon ${group.iconClass}"><i data-lucide="${group.icon}"></i></div>`}
+          <div class="stream-group-info">
+            <div class="stream-group-name">${group.name} <span class="pill ${group.tagClass}">${group.tag}</span></div>
+            <div class="stream-group-sub">${group.sub}</div>
+          </div>
+          <div class="stream-group-meta">${group.timeRange}<br><span class="count">${groupTxs.length} txs</span></div>
+        </div>
+        <div class="stream-txs">${groupTxs.map(renderStreamTxItem).join('')}</div>
+        <div class="stream-group-footer"><span>${group.footer}</span></div>
+      </div>`;
+    }
+  }
+
+  if (!html) { container.innerHTML=''; nr.classList.add('show'); }
+  else { nr.classList.remove('show'); container.innerHTML = html; }
+}
+
+// ═══ VISUAL VIEW 렌더링 ═══
+function seededRandom(seed) {
+  const x = Math.sin(seed*9301+49297)*233280;
+  return x - Math.floor(x);
+}
+function renderVisual() {
+  const filtered = getFilteredData();
+  const container = document.getElementById('visualContainer');
+  const nr = document.getElementById('noResultsVisual');
+  // 기존 닷 제거
+  container.querySelectorAll('.visual-dot').forEach(d => d.remove());
+
+  if (!filtered.length) { nr.classList.add('show'); return; }
+  nr.classList.remove('show');
+
+  const maxAge = 50;
+  const containerRect = container.getBoundingClientRect();
+  const w = containerRect.width;
+  const h = containerRect.height - 36; // axis 높이 제외
+
+  filtered.forEach(tx => {
+    const cfg = METHOD_CONFIG[tx.method];
+    const xPct = ((maxAge - tx.ageMin) / maxAge) * 85 + 5; // 5~90%
+    const yPct = 12 + seededRandom(tx.id) * 68; // 12~80%
+    const baseSize = tx.valNum <= 0 ? 18 : Math.max(18, Math.min(70, 10 + Math.log(tx.valNum + 1) * 6));
+    const fail = tx.status === 'failed';
+
+    const dot = document.createElement('div');
+    dot.className = `visual-dot vd-${tx.method}${fail?' vd-failed':''}`;
+    dot.style.cssText = `left:${xPct}%;top:${yPct}%;width:${baseSize}px;height:${baseSize}px;margin-left:${-baseSize/2}px;margin-top:${-baseSize/2}px;`;
+    dot.setAttribute('data-method', tx.method);
+    dot.setAttribute('data-status', tx.status);
+
+    dot.innerHTML = `<div class="visual-tooltip">
+      <div class="visual-tooltip-summary">${tx.summary}</div>
+      <div class="visual-tooltip-value">${tx.value}${tx.usd?' · '+tx.usd:''}</div>
+      <div class="visual-tooltip-time">${tx.age} · ${tx.block}</div>
+    </div>`;
+
+    container.appendChild(dot);
+  });
+}
+
+// ═══ 뷰 전환 ═══
+function switchView(view, btn) {
+  currentView = view;
+  document.querySelectorAll('#viewToggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  renderCurrentView();
+}
+
+function renderCurrentView() {
+  if (currentView === 'table') renderTable();
+  else if (currentView === 'stream') renderStream();
+  else if (currentView === 'visual') renderVisual();
+  if (window.lucide) lucide.createIcons();
+}
+
+// ═══ 필터 ═══
+function filterMethod(method, btn) {
+  currentMethod = method;
+  document.querySelectorAll('#methodFilter button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+function filterStatus(status, btn) {
+  currentStatus = status;
+  document.querySelectorAll('#statusFilter button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+function handleSearch(val) {
+  currentSearch = val.trim();
+  applyFilters();
+}
+function applyFilters() {
+  renderCurrentView();
+}
+
+// ═══ Activity Pulse 캔버스 ═══
+function initPulse() {
+  const canvas = document.getElementById('pulseCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = 80 * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = '80px';
+    ctx.scale(dpr, dpr);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const colors = ['#0060FF','#8000FF','#00C060','#f59e0b'];
+  const particles = [];
+  const W = () => canvas.width / dpr;
+  const H = () => 80;
+
+  for (let i = 0; i < 40; i++) {
+    particles.push({
+      x: Math.random() * 1600,
+      y: 10 + Math.random() * 60,
+      r: 1.5 + Math.random() * 4,
+      speed: 0.2 + Math.random() * 0.6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      opacity: 0.15 + Math.random() * 0.3
+    });
+  }
+
+  let animId = null;
+  function draw() {
+    ctx.clearRect(0, 0, W(), H());
+    particles.forEach(p => {
+      p.x += p.speed;
+      if (p.x > W() + p.r * 2) { p.x = -p.r * 2; p.y = 10 + Math.random() * 60; }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.opacity;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r * 2.5, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.opacity * 0.15;
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    animId = requestAnimationFrame(draw);
+  }
+  animId = requestAnimationFrame(draw);
+}
+
+// ═══ 유틸리티 ═══
+function copyText(text) {
+  if (!text) return;
+  navigator.clipboard.writeText(text);
+  const t = document.createElement('div');
+  t.textContent = 'Copied!';
+  t.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:9999;animation:fadeOut 1.5s ease forwards;font-family:var(--sans)';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 1500);
+}
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('explorer-theme', next);
+}
+(function(){const s=localStorage.getItem('explorer-theme');if(s)document.documentElement.setAttribute('data-theme',s)})();
+
+// ═══ 초기화 ═══
+document.addEventListener('DOMContentLoaded', function() {
+  renderCurrentView();
+  initPulse();
+  if (window.lucide) lucide.createIcons();
+});
+</script>
+</body>
+</html>

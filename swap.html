@@ -1,0 +1,1958 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TX Detail v10 &#x2014; Swap Transactions List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ═══ Design Tokens v3 ═══ */
+:root {
+  --bg-0:#06070b;--bg-1:#0c0d14;--bg-2:#12131c;--bg-3:#191b27;--bg-4:#1f2233;
+  --bg-glass:rgba(18,19,28,0.72);--bg-glass-2:rgba(25,27,39,0.6);
+  --brand:#8000FF;--brand-light:#9933FF;--brand-dim:rgba(128,0,255,0.15);
+  --accent:#00C0FF;--accent-dim:rgba(0,192,255,0.12);
+  --success:#00C060;--success-dim:rgba(0,192,96,0.10);
+  --error:#FF4080;--error-dim:rgba(255,64,128,0.10);
+  --warning:#f59e0b;--warning-dim:rgba(245,158,11,0.10);
+  --info:#0060FF;--info-dim:rgba(0,96,255,0.10);
+  --t1:#f0f0ff;--t2:#8b8ea5;--t3:#4e5068;--t4:#2a2c3e;
+  --link:#0060FF;--border:rgba(255,255,255,0.06);--border-h:rgba(255,255,255,0.12);
+  --r-sm:4px;--r-md:8px;--r-lg:16px;--r-xl:16px;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',-apple-system,sans-serif;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.3);--shadow-md:0 4px 16px rgba(0,0,0,0.3);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.4);--shadow-glow:0 0 60px rgba(128,0,255,0.08);
+}
+[data-theme="light"]{
+  --bg-0:rgba(0,0,64,0.1);--bg-1:rgba(0,0,64,0.05);--bg-2:#ffffff;--bg-3:rgba(0,0,64,0.03);--bg-4:rgba(0,0,64,0.06);
+  --bg-glass:rgba(255,255,255,0.92);--bg-glass-2:rgba(255,255,255,0.7);
+  --brand:#8000FF;--brand-light:#7000E0;--brand-dim:rgba(128,0,255,0.08);
+  --accent:#00A0D0;--accent-dim:rgba(0,192,255,0.08);
+  --success:#00A050;--success-dim:rgba(0,192,96,0.08);
+  --error:#E03060;--error-dim:rgba(255,64,128,0.08);
+  --warning:#d97706;--warning-dim:rgba(217,119,6,0.08);
+  --info:#0050DD;--info-dim:rgba(0,96,255,0.08);
+  --t1:#000040;--t2:rgba(0,0,64,0.6);--t3:rgba(0,0,64,0.4);--t4:rgba(0,0,64,0.2);
+  --link:#0050DD;--border:rgba(240,243,247,1);--border-h:rgba(205,210,216,1);
+  --shadow-sm:0 1px 3px rgba(0,0,64,0.04);--shadow-md:0 4px 12px rgba(0,0,64,0.06);
+  --shadow-lg:0 8px 16px rgba(0,0,64,0.1);--shadow-glow:0 0 60px rgba(128,0,255,0.06);
+}
+
+/* ═══ Lucide Icon Sizing ═══ */
+.alert-icon-wrap svg{width:16px;height:16px;stroke-width:2.5}
+.empty-state-icon svg{width:36px;height:36px;stroke-width:1.5;color:var(--t3)}
+.theme-toggle svg{width:16px;height:16px;stroke-width:2}
+.card-title svg.lucide{width:15px;height:15px;opacity:0.6}
+.method-tag svg.lucide{width:14px;height:14px}
+.flow-addr svg.lucide{width:10px;height:10px;opacity:0.5}
+.log-full-toggle svg.lucide{width:16px;height:16px}
+.search-bar svg.lucide{width:13px;height:13px}
+.gas-section .fee-savings svg.lucide{width:13px;height:13px}
+.swap-arrow svg.lucide{width:14px;height:14px}
+.fail-reason-label svg.lucide{width:14px;height:14px}
+.status-switcher button svg.lucide{width:12px;height:12px;stroke-width:3}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg-0);color:var(--t1);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;letter-spacing:0.01em}
+
+/* ═══ Animated BG — 0G Hub Dreamy Gradient ═══ */
+.bg-mesh {
+  display:none;
+}
+.bg-mesh::before {
+  content:'';position:absolute;top:10%;right:10%;width:500px;height:500px;
+  background:radial-gradient(circle, rgba(0,192,255,0.15) 0%, transparent 70%);
+  border-radius:50%;filter:blur(60px);
+  animation: meshFloat 20s ease-in-out infinite;
+}
+.bg-mesh::after {
+  content:'';position:absolute;bottom:10%;left:10%;width:400px;height:400px;
+  background:radial-gradient(circle, rgba(128,0,255,0.1) 0%, transparent 70%);
+  border-radius:50%;filter:blur(60px);
+  animation: meshFloat 25s ease-in-out infinite reverse;
+}
+@keyframes gradientBg {
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+@keyframes meshFloat {
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(5%,3%) scale(1.05)}
+  66%{transform:translate(-3%,5%) scale(0.95)}
+}
+[data-theme="dark"] .bg-mesh {
+  background: linear-gradient(135deg, #0a0a1a 0%, #151530 30%, #1a1040 50%, #151530 70%, #0a0a1a 100%);
+  background-size: 400% 400%;
+  animation: gradientBg 15s ease-in-out infinite;
+}
+[data-theme="dark"] .bg-mesh::before {
+  background:radial-gradient(circle, rgba(153,51,255,0.08) 0%, transparent 70%);
+}
+[data-theme="dark"] .bg-mesh::after {
+  background:radial-gradient(circle, rgba(0,192,255,0.05) 0%, transparent 70%);
+}
+
+/* ═══ Header ═══ */
+.header{position:sticky;top:0;z-index:100;background:rgba(6,7,11,0.8);backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:24px}
+.logo{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;letter-spacing:-0.3px}
+.logo-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--brand),var(--accent));box-shadow:0 2px 12px rgba(128,0,255,0.3)}
+.nav{display:flex;gap:1px}
+.nav a{color:var(--t2);text-decoration:none;font-size:13px;font-weight:500;padding:6px 12px;border-radius:8px;transition:all .2s}
+.nav a:hover{color:var(--t1);background:rgba(255,255,255,0.04)}
+.nav a.active{color:var(--t1);background:rgba(255,255,255,0.06)}
+.header-right{display:flex;align-items:center;gap:8px}
+.search-bar{display:flex;align-items:center;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 12px;gap:8px;width:320px;transition:border-color .2s}
+.search-bar:focus-within{border-color:rgba(128,0,255,0.4)}
+.search-bar input{background:none;border:none;outline:none;color:var(--t1);font-size:12px;width:100%;font-family:var(--sans)}
+.search-bar input::placeholder{color:var(--t3)}
+.kbd{font-size:10px;color:var(--t3);background:var(--bg-0);padding:1px 5px;border-radius:3px;border:1px solid var(--border);font-weight:500}
+.net-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:var(--t2);padding:0 10px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg-2)}
+.net-dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 6px rgba(0,192,96,.5);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.h-btn{height:32px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--brand),#7000E0);color:#fff;font-size:12px;font-weight:600;padding:0 16px;cursor:pointer;font-family:var(--sans);transition:transform .15s,box-shadow .15s}
+.h-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(128,0,255,0.3)}
+
+/* ═══ Page ═══ */
+.page{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:24px 32px 100px}
+
+/* ═══ Top Horizontal Layout (Hero + Flow) ═══ */
+.top-horizontal{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  margin-bottom:16px;align-items:stretch;
+}
+.breadcrumb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3);margin-bottom:20px}
+.breadcrumb a{color:var(--t2);text-decoration:none;transition:color .15s}
+.breadcrumb a:hover{color:var(--brand-light)}
+
+/* Method Switcher */
+.method-switcher{
+  display:flex;align-items:center;gap:4px;margin-bottom:24px;
+  background:rgba(255,255,255,0.50);border:1px solid rgba(255,255,255,0.30);border-radius:var(--r-md);padding:4px;
+  width:fit-content;backdrop-filter:blur(8px);
+}
+.method-switcher button{
+  font-size:12px;font-weight:600;padding:7px 18px;border:none;background:none;
+  border-radius:var(--r-sm);cursor:pointer;font-family:var(--sans);color:var(--t3);transition:all .2s;position:relative;
+}
+.method-switcher button.active{background:var(--brand-dim);color:var(--brand);box-shadow:inset 0 0 0 1px rgba(128,0,255,0.2)}
+.method-switcher button:hover:not(.active){color:var(--t2);background:rgba(128,0,255,0.04)}
+.ms-label{font-size:11px;color:var(--t3);margin-right:4px;font-weight:500;padding-left:8px}
+
+/* ═══════════════════════════════════════════
+   HERO STATUS — Full-Width Cinematic Banner
+   ═══════════════════════════════════════════ */
+.hero-status {
+  position:relative;border-radius:var(--r-xl);overflow:hidden;
+  padding:28px 32px 24px;
+  background:var(--bg-2);backdrop-filter:blur(16px);
+  border:1px solid var(--border);
+  display:flex;flex-direction:column;justify-content:center;
+  box-shadow:var(--shadow-md);
+}
+.hero-status::before {
+  content:'';position:absolute;inset:0;opacity:0.6;
+  background-size:200% 200%;
+  animation:gradientShift 8s ease-in-out infinite;
+}
+@keyframes gradientShift {
+  0%,100%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+}
+.hero-status.success::before {
+  background:linear-gradient(135deg, rgba(0,192,96,0.08) 0%, rgba(128,0,255,0.05) 50%, rgba(0,192,96,0.03) 100%);
+}
+.hero-status.failed::before {
+  background:linear-gradient(135deg, rgba(255,64,128,0.08) 0%, rgba(245,158,11,0.04) 50%, rgba(255,64,128,0.03) 100%);
+}
+.hero-status.pending::before {
+  background:linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(128,0,255,0.04) 50%, rgba(245,158,11,0.03) 100%);
+}
+
+/* Status + Badge Top */
+.hero-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-bottom:24px}
+.hero-top-left{display:flex;align-items:center;gap:10px}
+.hero-type-icon{
+  width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.hero-type-icon svg{width:18px;height:18px}
+.type-transfer .hero-type-icon{background:rgba(128,0,255,0.12);color:#8000FF;border:1px solid rgba(128,0,255,0.12)}
+.type-transfer .hero-status-text h2{color:#8000FF}
+.type-swap .hero-type-icon{background:var(--brand-dim);color:var(--brand);border:1px solid rgba(128,0,255,0.12)}
+.type-swap .hero-status-text h2{color:var(--brand)}
+.type-bridge .hero-type-icon{background:var(--info-dim);color:var(--info);border:1px solid rgba(0,96,255,0.12)}
+.type-bridge .hero-status-text h2{color:var(--info)}
+.type-approve .hero-type-icon{background:var(--warning-dim);color:var(--warning);border:1px solid rgba(245,158,11,0.12)}
+.type-approve .hero-status-text h2{color:var(--warning)}
+
+.hero-status-text h2{font-size:16px;font-weight:800;letter-spacing:-0.3px}
+.hero-status-text p{
+  font-size:12px;font-weight:500;margin-top:2px;
+  display:inline-flex;align-items:center;gap:4px;
+}
+.hero-status-text p svg.lucide{width:13px;height:13px;flex-shrink:0}
+.success .hero-status-text p{color:var(--success)}
+.failed .hero-status-text p{color:var(--error)}
+.pending .hero-status-text p{color:var(--warning)}
+
+.hero-timestamp{
+  font-size:11px;font-weight:600;padding:4px 12px;border-radius:16px;
+  color:var(--t2);position:relative;z-index:1;
+  background:rgba(255,255,255,0.40);border:1px solid rgba(255,255,255,0.30);
+}
+[data-theme="dark"] .hero-timestamp{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.06);color:var(--t3)}
+
+/* Amount */
+.hero-amount-section{position:relative;z-index:1;margin-bottom:20px}
+.hero-amount-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--t3);margin-bottom:6px}
+.hero-amount{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.hero-usd{
+  font-size:42px;font-weight:900;letter-spacing:-2px;
+  background:linear-gradient(135deg, var(--t1) 0%, var(--t2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1.1;
+}
+.hero-native{font-size:15px;font-weight:500;color:var(--t2)}
+.hero-meta{display:none}
+
+/* ═══════════════════════════════════════════
+   TOKEN FLOW — From → To Horizontal Flow
+   ═══════════════════════════════════════════ */
+.token-flow{
+  display:flex;flex-direction:column;align-items:stretch;gap:0;
+  background:var(--bg-2);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:20px;position:relative;
+  box-shadow:var(--shadow-md);
+}
+.token-flow::before{display:none}
+.flow-section-header{
+  display:flex;align-items:center;gap:7px;
+  font-size:13px;font-weight:700;letter-spacing:-0.2px;color:var(--t1);
+  margin-bottom:14px;
+}
+.flow-section-header svg.lucide{width:15px;height:15px;opacity:0.6}
+
+.flow-node{
+  position:relative;z-index:1;
+  padding:12px 14px;border-radius:var(--r-md);
+  background:rgba(255,255,255,0.40);backdrop-filter:blur(12px);
+  border:1px solid var(--border);
+  transition:border-color .2s, transform .2s;
+  display:flex;align-items:center;gap:12px;
+}
+.flow-node:hover{border-color:var(--border-h)}
+
+.flow-node-type{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;
+  margin-bottom:4px;display:flex;align-items:center;gap:6px;
+}
+.flow-node-type .indicator{
+  width:8px;height:8px;border-radius:50%;
+}
+.indicator-from{background:var(--success);box-shadow:0 0 8px rgba(0,192,96,0.5)}
+.indicator-to{background:var(--brand-light);box-shadow:0 0 8px rgba(153,51,255,0.5)}
+
+.flow-node-info{flex:1;min-width:0}
+
+.flow-avatar{
+  width:36px;height:36px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;flex-shrink:0;
+  background:linear-gradient(135deg, #6b7280, #4b5563);
+  border:2px solid rgba(255,255,255,0.20);
+}
+.flow-avatar.contract{
+  background:linear-gradient(135deg, var(--brand), #7000E0);
+  border-radius:8px;
+}
+.flow-avatar.chain-eth{background:linear-gradient(135deg, #627eea, #3b5998)}
+.flow-avatar.chain-arb{background:linear-gradient(135deg, #28a0f0, #1b6cb0)}
+
+.flow-name{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:2px;letter-spacing:-0.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.flow-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:4px}
+.flow-tag{
+  font-size:9px;font-weight:600;padding:2px 8px;border-radius:5px;
+}
+.flow-tag-contract{background:var(--brand-dim);color:var(--brand)}
+.flow-tag-chain{background:var(--success-dim);color:var(--success)}
+.flow-tag-chain-blue{background:var(--info-dim);color:var(--info)}
+.flow-tag-wallet{background:rgba(255,255,255,0.30);color:var(--t2)}
+
+.flow-addr{
+  font-family:var(--mono);font-size:11px;color:var(--t3);
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 8px;border-radius:6px;background:rgba(0,0,0,0.05);
+  cursor:pointer;transition:background .15s;
+}
+.flow-addr:hover{background:rgba(0,0,0,0.1)}
+.flow-addr svg{width:10px;height:10px;opacity:0.5}
+
+/* Flow Center Connector — Vertical */
+.flow-connector{
+  flex-shrink:0;position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+  padding:0;margin:0 0 0 30px;
+}
+.flow-line{
+  width:2px;height:32px;position:relative;overflow:visible;
+  background:linear-gradient(180deg, rgba(128,0,255,0.20), rgba(0,192,255,0.08));
+  border-radius:2px;
+}
+.flow-dot{
+  position:absolute;left:50%;transform:translateX(-50%);
+  width:24px;height:24px;border-radius:50%;
+  background:var(--brand);box-shadow:0 0 14px rgba(128,0,255,0.6);
+  animation:flowMoveV 2s ease-in-out infinite;
+  display:flex;align-items:center;justify-content:center;
+}
+.flow-dot svg.lucide{width:12px;height:12px;color:#fff;flex-shrink:0}
+@keyframes flowMoveV{
+  0%{top:-12px;opacity:0}
+  15%{opacity:1}
+  85%{opacity:1}
+  100%{top:calc(100% - 12px);opacity:0}
+}
+
+.flow-arrow-icon{display:none}
+
+.flow-token-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:16px;
+  background:rgba(128,0,255,0.06);border:none;
+  font-size:11px;font-weight:700;color:var(--t1);
+  font-family:var(--mono);white-space:nowrap;
+  margin-bottom:4px;
+}
+.flow-token-badge svg.lucide{width:12px;height:12px;flex-shrink:0}
+.flow-token-icon{
+  width:16px;height:16px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.icon-eth{background:url('icon-eth.svg') center/cover no-repeat;font-size:0!important;color:transparent!important}
+.icon-usdc{background:url('icon-usdc.svg') center/cover no-repeat;font-size:0!important;color:transparent!important}
+.icon-usdt{background:#26a17b}
+.icon-wbtc{background:#f7931a}
+.icon-dai{background:#f5ac37}
+
+/* Flow Node Accent Borders */
+.token-flow > .flow-node:first-of-type{border-left:3px solid var(--success)}
+.token-flow > .flow-node:last-of-type{border-left:3px solid var(--brand-light)}
+.token-flow > .flow-node.flow-failed{border-left:3px solid var(--error)}
+
+/* ═══ Flow Swap Info (Combined into Token Flow) ═══ */
+.flow-swap-info{
+  padding:12px 14px;margin-top:10px;
+  border-radius:var(--r-md);
+  background:rgba(255,255,255,0.30);
+  border:1px solid var(--border);
+  backdrop-filter:blur(8px);
+}
+.flow-swap-rate{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin-bottom:8px;
+}
+.flow-swap-rate-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--t3)}
+.flow-swap-rate-val{font-size:13px;font-weight:700;color:var(--t1)}
+.flow-swap-meta{
+  display:flex;gap:16px;flex-wrap:wrap;
+  font-size:11px;color:var(--t2);
+}
+.flow-swap-meta strong{color:var(--t1);font-weight:600}
+.flow-swap-info.flow-swap-failed{
+  background:rgba(255,64,128,0.04);
+  border-color:rgba(255,64,128,0.15);
+}
+[data-theme="dark"] .flow-swap-info{background:rgba(255,255,255,0.04)}
+
+/* ═══ Alert Banner ═══ */
+.alert-banner{
+  display:none;padding:12px 20px;border-radius:var(--r-md);
+  font-size:12px;font-weight:500;margin-bottom:16px;
+  line-height:1.5;align-items:center;gap:10px;
+  backdrop-filter:blur(8px);
+}
+.alert-banner.show{display:flex}
+.alert-banner.warn{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.12);color:var(--warning)}
+.alert-banner.info{background:rgba(0,96,255,0.06);border:1px solid rgba(0,96,255,0.12);color:var(--info)}
+.alert-banner.error{background:rgba(255,64,128,0.06);border:1px solid rgba(255,64,128,0.12);color:var(--error)}
+.alert-banner strong{font-weight:700}
+.alert-icon-wrap{
+  width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:14px;
+}
+.warn .alert-icon-wrap{background:rgba(245,158,11,0.12)}
+.info .alert-icon-wrap{background:rgba(0,96,255,0.12)}
+.error .alert-icon-wrap{background:rgba(255,64,128,0.12)}
+
+/* ═══ BENTO GRID ═══ */
+.bento-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+}
+.bento-gas{grid-row:1 / 3;grid-column:2}
+.bento-single .bento-gas{grid-row:1}
+
+/* Common Card */
+.bento-card{
+  background:var(--bg-2);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;transition:border-color .2s;
+  box-shadow:var(--shadow-sm);
+}
+.bento-card:hover{border-color:var(--border-h)}
+
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px 12px;
+}
+.card-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;letter-spacing:-0.2px}
+.card-title svg{width:15px;height:15px;opacity:0.6}
+.card-badge{font-size:9px;font-weight:700;padding:3px 10px;border-radius:16px;letter-spacing:0.3px}
+.badge-dev{background:var(--brand-dim);color:var(--brand)}
+.badge-count{background:rgba(255,255,255,0.30);color:var(--t2);border:1px solid var(--border)}
+.badge-protocol{background:var(--accent-dim);color:var(--accent)}
+.badge-warn{background:var(--warning-dim);color:var(--warning)}
+
+/* Expand Toggle */
+.expand-toggle{
+  display:flex;align-items:center;gap:6px;width:100%;
+  padding:10px 20px;border:none;background:none;cursor:pointer;
+  font-size:12px;font-weight:600;color:var(--t2);letter-spacing:0.3px;
+  border-top:1px solid var(--border);transition:color .15s;
+}
+.expand-toggle:hover{color:var(--t1)}
+.expand-toggle svg.lucide{width:14px;height:14px;transition:transform .2s}
+.expand-toggle.open svg.lucide{transform:rotate(180deg)}
+.expand-content{
+  display:none;padding:0;
+  border-top:1px solid var(--border);
+}
+.expand-content.open{display:block}
+
+/* Row Styles */
+.card-rows{padding:0 0 4px}
+.c-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 20px;
+  transition:background .15s;
+}
+.c-row:hover{background:rgba(128,0,255,0.02)}
+.c-row + .c-row{border-top:1px solid rgba(0,0,0,0.04)}
+.c-row-key{font-size:12px;color:var(--t2);font-weight:500}
+.c-row-val{
+  font-size:12px;color:var(--t1);font-weight:600;text-align:right;
+  display:flex;align-items:center;gap:6px;
+}
+.c-row-val.mono{font-family:var(--mono);font-size:11px;font-weight:500}
+.c-row-sub{font-size:10px;color:var(--t3);margin-top:2px;font-weight:400}
+
+/* Inline Tags */
+.pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:16px;white-space:nowrap}
+.pill-success{background:var(--success-dim);color:var(--success)}
+.pill-warning{background:var(--warning-dim);color:var(--warning)}
+.pill-error{background:var(--error-dim);color:var(--error)}
+.pill-info{background:var(--info-dim);color:var(--info)}
+.pill-brand{background:var(--brand-dim);color:var(--brand)}
+.pill-neutral{background:rgba(0,0,0,0.04);color:var(--t2)}
+
+/* Metric Mini Cards */
+.metric-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  padding:8px 12px 12px;
+}
+.metric-mini{
+  padding:12px;border-radius:var(--r-md);
+  background:rgba(255,255,255,0.40);border:1px solid rgba(255,255,255,0.30);
+  transition:border-color .2s;
+}
+.metric-mini:hover{border-color:var(--border-h)}
+.metric-label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.metric-value{font-size:16px;font-weight:800;letter-spacing:-0.5px;color:var(--t1);margin-bottom:2px}
+.metric-sub{font-size:10px;color:var(--t3);font-weight:500}
+.metric-tag{margin-top:4px}
+
+/* TX Identity */
+.hero-tx-identity{
+  position:relative;z-index:1;
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;color:var(--t3);font-weight:500;
+  flex-wrap:wrap;
+  margin-top:16px;
+}
+.hero-tx-id-label{
+  font-size:11px;font-weight:600;color:var(--t2);
+  letter-spacing:-0.1px;
+}
+.hero-tx-id-hash{
+  font-family:var(--mono);font-size:11px;font-weight:500;
+  color:var(--t1);letter-spacing:0.2px;
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 8px;border-radius:6px;
+  background:rgba(0,0,0,0.05);
+  cursor:pointer;transition:background .15s;
+}
+.hero-tx-id-hash:hover{background:rgba(0,0,0,0.1)}
+.hero-tx-id-hash svg.lucide{width:10px;height:10px;opacity:0.5}
+.hero-tx-id-sep{color:var(--t3);opacity:0.4;font-size:10px}
+.hero-tx-id-block{
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  color:var(--link);
+}
+
+/* Detail List View */
+.detail-list{
+  padding:0 0 0;
+}
+.detail-list .c-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 20px;
+  transition:background .15s;
+}
+.detail-list .c-row:hover{background:rgba(128,0,255,0.02)}
+.detail-list .c-row + .c-row{border-top:1px solid rgba(0,0,0,0.04)}
+
+/* Section Separator */
+.detail-separator{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 20px;margin:0;
+}
+.detail-separator-line{flex:1;height:1px;background:var(--border)}
+.detail-separator-label{
+  font-size:9px;font-weight:700;color:var(--t3);
+  text-transform:uppercase;letter-spacing:0.8px;
+  padding:3px 10px;border-radius:16px;
+  background:rgba(255,255,255,0.40);border:1px solid var(--border);
+  white-space:nowrap;
+}
+
+/* Gas & Fee Breakdown */
+.gas-section{padding:8px 16px 4px}
+.gas-usage{margin-bottom:14px}
+.gas-usage-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.gas-usage-label{font-size:11px;font-weight:600;color:var(--t2)}
+.gas-desc{font-size:10px;color:var(--t3);margin-top:6px}
+.gas-usage-nums{font-family:var(--mono);font-size:11px;color:var(--t1);font-weight:600}
+.gas-bar{height:8px;border-radius:4px;background:rgba(0,0,0,0.06);overflow:hidden;position:relative}
+.gas-bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--success),#8000FF);transition:width .6s ease}
+.gas-bar-fill.high{background:linear-gradient(90deg,var(--warning),var(--error))}
+.gas-bar-fill.fail{background:linear-gradient(90deg,var(--error),#b91c1c)}
+.gas-pct{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.gas-pct-val{font-size:10px;font-weight:700;color:var(--t2)}
+.gas-pct-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:16px}
+.gas-eff-good{background:var(--success-dim);color:var(--success)}
+.gas-eff-avg{background:var(--warning-dim);color:var(--warning)}
+.gas-eff-bad{background:var(--error-dim);color:var(--error)}
+
+/* Fee Table */
+.fee-breakdown{
+  padding:10px 12px;border-radius:var(--r-sm);
+  background:rgba(0,0,0,0.03);margin-bottom:10px;
+}
+.fee-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:11px}
+.fee-row + .fee-row{border-top:1px solid rgba(0,0,0,0.04)}
+.fee-key{color:var(--t3);font-weight:500}
+.fee-val{font-family:var(--mono);color:var(--t1);font-weight:600;display:flex;align-items:center;gap:4px}
+.fee-gwei{font-size:10px;color:var(--t3);font-weight:400}
+.fee-sub{font-size:9px;color:var(--t3);font-weight:400}
+.fee-row.fee-total{padding-top:8px;margin-top:4px;border-top:1px dashed rgba(0,0,0,0.08)}
+.fee-row.fee-total .fee-key{font-weight:700;color:var(--t1)}
+.fee-row.fee-total .fee-val{font-size:12px;font-weight:800}
+
+/* Formula Tooltip */
+.fee-total-key{display:flex;align-items:center;gap:5px}
+.fee-info-wrap{position:relative;display:inline-flex;cursor:help}
+.fee-info-wrap:hover .fee-formula{display:block}
+.fee-formula{display:none;position:absolute;bottom:calc(100% + 10px);left:-8px;
+  background:rgba(255,255,255,0.95);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.40);border-radius:8px;
+  padding:12px 16px;white-space:nowrap;z-index:10;box-shadow:var(--shadow-md);min-width:200px}
+.fee-formula::after{content:'';position:absolute;top:100%;left:16px;
+  border:6px solid transparent;border-top-color:rgba(255,255,255,0.40)}
+.formula-label{display:block;font-size:10px;font-weight:500;color:var(--t3);margin-bottom:6px;font-family:var(--sans)}
+.formula-calc{display:block;font-family:var(--mono);font-size:11px;color:var(--t1);font-weight:600;line-height:1.5}
+.formula-result{display:block;font-family:var(--mono);font-size:11px;color:var(--brand);font-weight:700;margin-top:4px;padding-top:6px;border-top:1px dashed var(--border)}
+
+/* EIP-1559 Savings */
+.fee-savings{
+  padding:10px 12px;border-radius:8px;margin-bottom:4px;
+  background:linear-gradient(135deg,rgba(0,192,96,0.06),rgba(128,0,255,0.04));
+  border:1px solid rgba(0,192,96,0.1);
+}
+.savings-main{font-size:12px;font-weight:700;color:var(--success);display:flex;align-items:center;gap:5px}
+.savings-detail{font-size:10px;color:var(--t3);margin-top:3px}
+.fee-wasted{
+  padding:10px 12px;border-radius:8px;margin-bottom:4px;
+  background:rgba(255,64,128,0.06);
+  border:1px solid rgba(255,64,128,0.1);
+}
+.wasted-main{font-size:12px;font-weight:700;color:var(--error);display:flex;align-items:center;gap:5px}
+.wasted-detail{font-size:10px;color:var(--t3);margin-top:3px}
+
+.badge-eip{background:var(--accent-dim);color:var(--accent)}
+.badge-legacy{background:rgba(0,0,0,0.04);color:var(--t2);border:1px solid var(--border)}
+
+/* ═══ "In Simple Terms" ═══ */
+.easy-bubble{
+  margin:8px 12px 12px;
+  position:relative;
+}
+.easy-bubble-inner{
+  padding:16px 18px;border-radius:var(--r-lg);
+  background:linear-gradient(135deg, rgba(128,0,255,0.06), rgba(0,192,255,0.04));
+  border:1px solid rgba(128,0,255,0.1);
+  position:relative;
+}
+.easy-bubble-inner::before{
+  content:'';position:absolute;top:-6px;left:24px;
+  width:12px;height:12px;rotate:45deg;
+  background:linear-gradient(135deg, rgba(128,0,255,0.06), rgba(0,192,255,0.04));
+  border-left:1px solid rgba(128,0,255,0.1);border-top:1px solid rgba(128,0,255,0.1);
+}
+.easy-label{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;color:var(--brand);
+  margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;
+}
+.easy-label .ai-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--brand);
+  animation:pulse 1.5s ease-in-out infinite;
+}
+.easy-bubble p{font-size:13px;color:var(--t1);line-height:1.7}
+.easy-bubble .hl{color:var(--brand);font-weight:700}
+.easy-bubble .hl-warn{color:var(--warning);font-weight:700}
+.easy-bubble .sub-note{font-size:11px;color:var(--t3);margin-top:6px;padding-top:6px;border-top:1px solid rgba(0,0,0,0.04)}
+
+/* ═══ Swap Visual ═══ */
+.swap-visual{
+  padding:16px;margin:0 12px 4px;
+  background:rgba(255,255,255,0.40);border-radius:var(--r-lg);
+  border:1px solid rgba(255,255,255,0.30);
+}
+.swap-pair{
+  display:flex;align-items:center;justify-content:center;gap:16px;
+  margin-bottom:12px;
+}
+.swap-token{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;border-radius:var(--r-md);
+  background:rgba(255,255,255,0.60);border:1px solid var(--border);
+  min-width:0;
+}
+.swap-token-icon{
+  width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.swap-token-amount{font-size:16px;font-weight:800;letter-spacing:-0.5px}
+.swap-token-name{font-size:11px;color:var(--t3);font-weight:500}
+.swap-arrow{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--brand-dim);border:1px solid rgba(128,0,255,0.15);
+  display:flex;align-items:center;justify-content:center;
+  animation:swapPulse 3s ease-in-out infinite;
+}
+@keyframes swapPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(128,0,255,0.2)}
+  50%{box-shadow:0 0 0 8px rgba(128,0,255,0)}
+}
+.swap-rate-bar{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:11px;color:var(--t2);
+  padding:8px;border-radius:8px;background:rgba(0,0,0,0.03);
+}
+.swap-rate-bar strong{color:var(--t1);font-weight:700}
+
+/* ═══ Swap Transactions List Page ═══ */
+.swap-page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.swap-page-title{display:flex;align-items:center;gap:12px}
+.swap-page-icon{width:42px;height:42px;border-radius:8px;background:var(--brand-dim);border:1px solid rgba(128,0,255,0.15);display:flex;align-items:center;justify-content:center;color:var(--brand)}
+.swap-page-icon svg{width:20px;height:20px}
+.swap-page-title h1{font-size:22px;font-weight:900;letter-spacing:-0.5px}
+.swap-page-title p{font-size:12px;color:var(--t3);font-weight:500;margin-top:2px}
+.swap-page-stats{display:flex;gap:16px}
+.swap-stat{text-align:center;padding:8px 16px;border-radius:var(--r-md);background:var(--bg-2);backdrop-filter:blur(16px);border:1px solid var(--border);box-shadow:var(--shadow-sm)}
+.swap-stat-val{font-size:16px;font-weight:800;letter-spacing:-0.3px}
+.swap-stat-label{font-size:10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:0.3px}
+
+.swap-filter-bar{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.swap-filter-group{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.50);border:1px solid rgba(255,255,255,0.30);border-radius:var(--r-sm);padding:3px;backdrop-filter:blur(8px)}
+.swap-filter-btn{font-size:11px;font-weight:600;padding:5px 12px;border:none;background:none;border-radius:7px;cursor:pointer;font-family:var(--sans);color:var(--t3);transition:all .2s;white-space:nowrap;display:inline-flex;align-items:center;gap:3px}
+.swap-filter-btn.active{background:var(--brand-dim);color:var(--brand);box-shadow:inset 0 0 0 1px rgba(128,0,255,0.15)}
+.swap-filter-btn:hover:not(.active){color:var(--t2);background:rgba(128,0,255,0.04)}
+.swap-filter-sep{width:1px;height:20px;background:var(--border);margin:0 4px}
+.swap-search{display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(255,255,255,0.50);border:1px solid rgba(255,255,255,0.30);border-radius:var(--r-sm);margin-left:auto;backdrop-filter:blur(8px)}
+.swap-search svg.lucide{width:12px;height:12px;color:var(--t3)}
+.swap-search input{background:none;border:none;outline:none;font-size:11px;font-weight:500;color:var(--t1);font-family:var(--sans);width:160px}
+.swap-search input::placeholder{color:var(--t3)}
+
+.swap-tx-list{display:flex;flex-direction:column;gap:4px}
+.swap-tx-item{border-radius:var(--r-md);overflow:visible}
+.swap-tx-row{display:grid;grid-template-columns:auto 1fr auto auto auto;align-items:center;gap:16px;padding:14px 20px;cursor:pointer;transition:all .15s;background:var(--bg-2);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--r-lg);position:relative;box-shadow:var(--shadow-sm)}
+.swap-tx-row:hover{border-color:var(--border-h);background:rgba(255,255,255,0.85)}
+.swap-tx-item.open .swap-tx-row{border-radius:var(--r-lg) var(--r-lg) 0 0;border-bottom-color:transparent;background:rgba(255,255,255,0.85)}
+
+.swap-row-status{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.swap-row-status.status-ok{background:var(--success);box-shadow:0 0 6px rgba(0,192,96,0.4)}
+.swap-row-status.status-fail{background:var(--error);box-shadow:0 0 6px rgba(255,64,128,0.4)}
+
+.swap-row-pair{display:flex;align-items:center;gap:10px}
+.swap-row-icons{display:flex;align-items:center;position:relative;width:36px;height:24px;flex-shrink:0}
+.swap-row-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;position:absolute;top:50%;transform:translateY(-50%);border:2px solid rgba(255,255,255,0.80)}
+.swap-row-icon:first-child{left:0;z-index:2}
+.swap-row-icon:last-child{left:14px;z-index:1}
+.swap-row-pair-text{display:flex;flex-direction:column;gap:1px}
+.swap-row-pair-label{font-size:13px;font-weight:700;letter-spacing:-0.2px;white-space:nowrap}
+.swap-row-dex{font-size:10px;font-weight:600;color:var(--t3);white-space:nowrap}
+
+.swap-row-amount{font-size:12px;font-weight:600;color:var(--t2);white-space:nowrap;font-family:var(--mono)}
+.swap-row-amount.failed{text-decoration:line-through;opacity:0.5}
+
+.swap-row-value{text-align:right;white-space:nowrap}
+.swap-row-usd{font-size:13px;font-weight:700;letter-spacing:-0.2px}
+.swap-row-time{font-size:10px;color:var(--t3);font-weight:500;margin-top:1px}
+
+.swap-row-chevron{width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:transform .2s;flex-shrink:0}
+.swap-row-chevron svg.lucide{width:16px;height:16px}
+.swap-tx-item.open .swap-row-chevron{transform:rotate(180deg);color:var(--brand)}
+
+.swap-tx-detail{display:none;background:var(--bg-1);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--r-lg) var(--r-lg);padding:20px}
+.swap-tx-item.open .swap-tx-detail{display:block}
+.swap-tx-detail .top-horizontal{margin-bottom:16px}
+.swap-tx-detail .hero-status{border-radius:var(--r-lg)}
+
+/* ═══ Swap Detail Card (replaces Token Flow in top-horizontal) ═══ */
+.swap-detail-card{
+  background:var(--bg-2);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  box-shadow:var(--shadow-md);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.swap-detail-card .swap-visual{
+  margin:0 16px 4px;padding:16px;
+  background:rgba(255,255,255,0.30);border-radius:var(--r-md);
+  border:1px solid rgba(255,255,255,0.20);
+}
+.swap-detail-card .swap-pair{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  margin-bottom:12px;flex-wrap:wrap;
+}
+.swap-detail-card .swap-token{
+  min-width:0;flex:1;
+}
+.swap-detail-card .card-rows{padding:0 0 8px}
+.swap-detail-card .c-row{padding:8px 20px}
+.swap-detail-failed{border-color:rgba(255,64,128,0.15)}
+.swap-detail-failed .swap-visual{
+  background:rgba(255,64,128,0.03);
+  border-color:rgba(255,64,128,0.10);
+}
+[data-theme="dark"] .swap-detail-card{background:var(--bg-2)}
+[data-theme="dark"] .swap-detail-card .swap-visual{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .swap-detail-failed .swap-visual{background:rgba(255,64,128,0.06);border-color:rgba(255,64,128,0.1)}
+
+/* ═══ Swap Widget Module — 0G Hub Style ═══ */
+.page-layout{display:grid;grid-template-columns:1fr 380px;gap:20px;align-items:start}
+.page-main{min-width:0}
+.swap-widget{
+  position:sticky;top:96px;
+  background:rgba(255,255,255,0.80);
+  backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,0.50);
+  border-radius:var(--r-xl);
+  overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,192,255,0.08);
+}
+.sw-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px 14px;
+}
+.sw-title{font-size:15px;font-weight:800;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px}
+.sw-title svg.lucide{width:16px;height:16px;color:var(--brand)}
+.sw-settings{
+  width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
+  background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--t3);transition:all .15s;
+}
+.sw-settings:hover{color:var(--t1);border-color:var(--border-h);background:rgba(128,0,255,0.04)}
+.sw-settings svg.lucide{width:14px;height:14px}
+
+/* Token Input Fields */
+.sw-body{padding:0 16px 16px}
+.sw-input-box{
+  padding:18px;border-radius:var(--r-lg);
+  background:rgba(255,255,255,0.40);border:1px solid rgba(255,255,255,0.30);
+  backdrop-filter:blur(8px);
+  transition:border-color .2s;
+}
+.sw-input-box:focus-within{border-color:rgba(128,0,255,0.4)}
+.sw-input-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sw-input-label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.sw-input{
+  flex:1;background:none;border:none;outline:none;
+  font-size:24px;font-weight:800;letter-spacing:-0.5px;
+  color:var(--t1);font-family:var(--sans);
+  min-width:0;
+}
+.sw-input::placeholder{color:var(--t4)}
+.sw-token-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 14px 6px 6px;border-radius:16px;
+  background:rgba(255,255,255,0.60);border:1px solid rgba(255,255,255,0.40);
+  backdrop-filter:blur(8px);
+  cursor:pointer;transition:all .15s;flex-shrink:0;
+  font-family:var(--sans);
+}
+.sw-token-btn:hover{border-color:var(--border-h);background:rgba(255,255,255,0.80)}
+.sw-token-icon{
+  width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:800;color:#fff;flex-shrink:0;
+}
+.sw-token-name{font-size:13px;font-weight:700;color:var(--t1)}
+.sw-token-btn svg.lucide{width:12px;height:12px;color:var(--t3)}
+.sw-balance{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.sw-balance-text{font-size:10px;color:var(--t3);font-weight:500}
+.sw-balance-usd{font-size:11px;color:var(--t2);font-weight:600}
+.sw-max-btn{
+  font-size:9px;font-weight:700;color:var(--brand);cursor:pointer;
+  padding:2px 6px;border-radius:4px;background:var(--brand-dim);
+  border:none;font-family:var(--sans);transition:opacity .15s;
+}
+.sw-max-btn:hover{opacity:0.8}
+
+/* Swap Direction Arrow */
+.sw-arrow-wrap{
+  display:flex;align-items:center;justify-content:center;
+  margin:-8px 0;position:relative;z-index:2;
+}
+.sw-arrow-btn{
+  width:36px;height:36px;border-radius:8px;
+  background:rgba(255,255,255,0.60);border:2px solid rgba(255,255,255,0.40);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .2s;color:var(--t2);
+}
+.sw-arrow-btn:hover{color:var(--brand);border-color:rgba(128,0,255,0.3);transform:rotate(180deg)}
+.sw-arrow-btn svg.lucide{width:16px;height:16px}
+
+/* Rate & Details */
+.sw-rate{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;border-radius:var(--r-sm);margin-bottom:12px;
+  background:rgba(0,0,0,0.03);font-size:11px;color:var(--t2);
+}
+.sw-rate-value{font-weight:700;color:var(--t1)}
+.sw-details{margin-bottom:14px}
+.sw-detail-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 0;font-size:11px;
+}
+.sw-detail-row + .sw-detail-row{border-top:1px solid rgba(0,0,0,0.04)}
+.sw-detail-key{color:var(--t3);font-weight:500}
+.sw-detail-val{color:var(--t1);font-weight:600;display:flex;align-items:center;gap:4px}
+
+/* Swap Button — Black CTA */
+.sw-submit{
+  width:100%;padding:16px;border:none;border-radius:16px;
+  background:#000;color:#fff;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:var(--sans);transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,0.15);
+}
+.sw-submit:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,0,0,0.25)}
+.sw-submit:active{transform:translateY(0)}
+.sw-submit svg.lucide{width:16px;height:16px}
+[data-theme="dark"] .sw-submit{background:#fff;color:#000}
+
+/* Settings Panel */
+.sw-settings-panel{
+  display:none;padding:0 16px 16px;
+  border-top:1px solid var(--border);
+}
+.sw-settings-panel.open{display:block}
+.sw-settings-title{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 8px}
+.sw-slippage-row{display:flex;gap:4px}
+.sw-slip-btn{
+  flex:1;padding:6px;border-radius:7px;border:1px solid var(--border);
+  background:none;font-size:11px;font-weight:600;color:var(--t2);
+  cursor:pointer;font-family:var(--sans);transition:all .15s;text-align:center;
+}
+.sw-slip-btn.active{background:var(--brand-dim);color:var(--brand);border-color:rgba(128,0,255,0.2)}
+.sw-slip-btn:hover:not(.active){border-color:var(--border-h);color:var(--t1)}
+.sw-slip-custom{
+  flex:1;padding:6px 8px;border-radius:7px;border:1px solid var(--border);
+  background:none;font-size:11px;font-weight:600;color:var(--t1);
+  font-family:var(--mono);text-align:center;outline:none;
+}
+.sw-slip-custom:focus{border-color:rgba(128,0,255,0.3)}
+.sw-deadline-row{display:flex;align-items:center;gap:6px;margin-top:8px}
+.sw-deadline-input{
+  width:60px;padding:6px 8px;border-radius:7px;border:1px solid var(--border);
+  background:none;font-size:11px;font-weight:600;color:var(--t1);
+  font-family:var(--mono);text-align:center;outline:none;
+}
+.sw-deadline-input:focus{border-color:rgba(128,0,255,0.3)}
+.sw-deadline-label{font-size:11px;color:var(--t3);font-weight:500}
+
+/* Powered by footer */
+.sw-footer{
+  padding:10px 16px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:10px;color:var(--t3);font-weight:500;
+}
+.sw-footer svg.lucide{width:10px;height:10px}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+/* Responsive */
+@media(max-width:1100px){
+  .page-layout{grid-template-columns:1fr}
+  .swap-widget{position:static;max-width:420px;margin:0 auto 24px}
+  .top-horizontal{grid-template-columns:1fr}
+}
+
+/* ═══ DETAIL TABS ═══ */
+.detail-tabs{
+  display:flex;align-items:center;gap:0;
+  border-bottom:1px solid rgba(0,0,0,0.06);
+  margin-bottom:16px;padding:0 4px;
+}
+.detail-tabs button{
+  font-size:12px;font-weight:600;padding:10px 18px;
+  border:none;background:none;cursor:pointer;font-family:var(--sans);
+  color:var(--t3);position:relative;transition:color .2s;
+  display:flex;align-items:center;gap:6px;
+}
+.detail-tabs button:hover{color:var(--t2)}
+.detail-tabs button.active{color:var(--t1)}
+.detail-tabs button.active::after{
+  content:'';position:absolute;bottom:-1px;left:12px;right:12px;height:2px;
+  background:var(--brand);border-radius:2px;
+}
+.tab-count{
+  font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;
+  background:rgba(0,0,0,0.04);color:var(--t3);min-width:18px;text-align:center;
+}
+.detail-tabs button.active .tab-count{background:var(--brand-dim);color:var(--brand)}
+
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ═══ Data Table ═══ */
+.data-table{
+  width:100%;border-collapse:collapse;
+  background:var(--bg-2);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--r-lg);
+  overflow:hidden;
+}
+.data-table thead{background:rgba(255,255,255,0.40)}
+.data-table th{
+  font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;
+  letter-spacing:0.5px;padding:10px 16px;text-align:left;
+  border-bottom:1px solid var(--border);
+}
+.data-table td{
+  font-size:12px;color:var(--t1);padding:12px 16px;
+  border-bottom:1px solid rgba(0,0,0,0.04);
+  vertical-align:middle;
+}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(128,0,255,0.02)}
+.data-table .addr{font-family:var(--mono);font-size:11px;color:var(--link);cursor:pointer}
+.data-table .addr:hover{text-decoration:underline}
+.data-table .token-cell{display:flex;align-items:center;gap:8px}
+.data-table .type-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px}
+.type-in{background:rgba(0,192,96,0.1);color:var(--success)}
+.type-out{background:rgba(255,64,128,0.1);color:var(--error)}
+.type-self{background:rgba(128,0,255,0.1);color:var(--brand)}
+
+/* ═══ Full Log Card ═══ */
+.log-full{
+  background:var(--bg-2);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--r-lg);
+  margin-bottom:8px;overflow:hidden;
+}
+.log-full-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;cursor:pointer;transition:background .15s;
+}
+.log-full-header:hover{background:rgba(128,0,255,0.02)}
+.log-full-idx{
+  font-family:var(--mono);font-size:11px;font-weight:700;
+  width:28px;height:28px;border-radius:8px;
+  background:rgba(255,255,255,0.40);display:flex;align-items:center;justify-content:center;
+  color:var(--t2);
+}
+.log-full-meta{flex:1;margin-left:12px;display:flex;align-items:center;gap:8px}
+.log-full-event{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--brand)}
+.log-full-contract{font-size:10px;font-weight:600;padding:2px 8px;border-radius:5px;background:var(--brand-dim);color:var(--brand)}
+.log-full-toggle{color:var(--t3);transition:transform .2s}
+.log-full.open .log-full-toggle{transform:rotate(180deg)}
+.log-full-body{
+  display:none;padding:0 16px 14px;
+  border-top:1px solid var(--border);
+}
+.log-full.open .log-full-body{display:block}
+.log-section-label{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin:12px 0 6px}
+.log-hex{
+  font-family:var(--mono);font-size:10px;color:var(--t2);
+  padding:8px 10px;background:rgba(0,0,0,0.03);border-radius:8px;
+  word-break:break-all;line-height:1.6;
+}
+.log-topic{
+  display:flex;gap:8px;padding:4px 0;font-size:11px;
+}
+.log-topic-idx{font-family:var(--mono);color:var(--t3);flex-shrink:0;width:12px}
+.log-topic-val{font-family:var(--mono);color:var(--t2);word-break:break-all}
+
+/* ═══ Empty State ═══ */
+.empty-state{
+  padding:60px 20px;text-align:center;
+  background:var(--bg-2);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--r-lg);
+}
+.empty-state-icon{font-size:32px;margin-bottom:12px;opacity:0.3}
+.empty-state-text{font-size:13px;color:var(--t3);font-weight:500}
+.empty-state-sub{font-size:11px;color:var(--t4);margin-top:4px}
+
+/* ═══ Lucide Icon: Gas Section ═══ */
+.gas-section svg.lucide{width:14px;height:14px}
+.fee-savings svg.lucide{width:13px;height:13px}
+.fee-wasted svg.lucide{width:13px;height:13px}
+
+/* ═══ NFT Transfer Card ═══ */
+.nft-transfer-card{
+  display:flex;align-items:center;gap:16px;
+  padding:16px;background:var(--bg-2);backdrop-filter:blur(16px);border:1px solid var(--border);border-radius:var(--r-lg);
+  margin-bottom:8px;
+}
+.nft-thumb{
+  width:56px;height:56px;border-radius:8px;
+  background:linear-gradient(135deg,rgba(255,255,255,0.40),rgba(255,255,255,0.20));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;border:1px solid var(--border);
+}
+.nft-info{flex:1}
+.nft-info-name{font-size:13px;font-weight:700;margin-bottom:2px}
+.nft-info-collection{font-size:11px;color:var(--t2)}
+.nft-info-meta{font-size:10px;color:var(--t3);margin-top:4px;display:flex;gap:8px}
+
+/* ═══ Hidden ═══ */
+.method-content{display:none}
+.method-content.active{display:block}
+
+/* ═══ Status Switcher ═══ */
+.switcher-row{display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.status-switcher{
+  display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,0.50);border:1px solid rgba(255,255,255,0.30);border-radius:var(--r-md);padding:4px;
+  width:fit-content;backdrop-filter:blur(8px);
+}
+.status-switcher button{
+  font-size:12px;font-weight:600;padding:7px 18px;border:none;background:none;
+  border-radius:var(--r-sm);cursor:pointer;font-family:var(--sans);color:var(--t3);transition:all .2s;
+  display:flex;align-items:center;gap:5px;
+}
+.status-switcher button.active{box-shadow:inset 0 0 0 1px rgba(128,0,255,0.2)}
+.status-switcher button.s-ok.active{background:var(--success-dim);color:var(--success)}
+.status-switcher button.s-fail.active{background:var(--error-dim);color:var(--error)}
+.status-switcher button:hover:not(.active){color:var(--t2);background:rgba(128,0,255,0.04)}
+.ss-label{font-size:11px;color:var(--t3);margin-right:4px;font-weight:500;padding-left:8px}
+.state-content{display:none}
+.state-content.active{display:block}
+
+/* Failure State */
+.fail-reason-box{
+  margin:8px 12px 12px;padding:14px 16px;border-radius:var(--r-md);
+  background:rgba(255,64,128,0.04);border:1px solid rgba(255,64,128,0.1);
+}
+.fail-reason-label{font-size:10px;font-weight:700;color:var(--error);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.fail-reason-code{font-family:var(--mono);font-size:11px;color:var(--t2);padding:6px 10px;background:rgba(0,0,0,0.04);border-radius:6px;margin-top:6px;word-break:break-all}
+.fail-cost-note{font-size:11px;color:var(--t3);margin-top:8px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.04)}
+
+.flow-node.flow-failed{border-color:rgba(255,64,128,0.2)}
+.flow-connector-fail .flow-line{background:linear-gradient(180deg, rgba(255,64,128,0.2), rgba(255,64,128,0.06))}
+.flow-connector-fail .flow-dot{background:var(--error);box-shadow:0 0 12px rgba(255,64,128,0.5);animation:none;top:calc(50% - 12px);left:50%;transform:translateX(-50%);opacity:1}
+.flow-connector-fail .flow-token-badge{opacity:0.5;text-decoration:line-through}
+
+/* Theme Toggle Button */
+.theme-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--bg-2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;overflow:hidden}
+.theme-toggle:hover{border-color:var(--border-h);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.theme-toggle .icon-sun,.theme-toggle .icon-moon{position:absolute;transition:transform .3s ease,opacity .3s ease}
+[data-theme="light"] .theme-toggle .icon-moon{transform:translateY(0);opacity:1}
+[data-theme="light"] .theme-toggle .icon-sun{transform:translateY(-30px);opacity:0}
+[data-theme="dark"] .theme-toggle .icon-sun{transform:translateY(0);opacity:1}
+[data-theme="dark"] .theme-toggle .icon-moon{transform:translateY(30px);opacity:0}
+:root .theme-toggle .icon-sun{transform:translateY(0);opacity:1}
+:root .theme-toggle .icon-moon{transform:translateY(30px);opacity:0}
+
+/* ═══ Dark Theme Overrides ═══ */
+[data-theme="dark"] body{background:var(--bg-0)}
+[data-theme="dark"] .method-switcher{background:rgba(20,20,45,0.6);border-color:rgba(255,255,255,0.08)}
+[data-theme="dark"] .method-switcher button.active{background:var(--brand-dim);color:var(--brand-light)}
+[data-theme="dark"] .hero-status{background:var(--bg-2);box-shadow:var(--shadow-md)}
+[data-theme="dark"] .hero-usd{background:linear-gradient(135deg, var(--t1) 0%, var(--t2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+[data-theme="dark"] .token-flow{background:var(--bg-2)}
+[data-theme="dark"] .flow-node{background:rgba(255,255,255,0.04);backdrop-filter:blur(8px)}
+[data-theme="dark"] .flow-avatar{background:linear-gradient(135deg, #374151, #1f2937);border-color:var(--bg-4)}
+[data-theme="dark"] .flow-addr{background:rgba(255,255,255,0.06)}
+[data-theme="dark"] .flow-addr:hover{background:rgba(255,255,255,0.10)}
+[data-theme="dark"] .flow-tag-wallet{background:rgba(255,255,255,0.05);color:var(--t2)}
+[data-theme="dark"] .bento-card{background:var(--bg-2);box-shadow:var(--shadow-md)}
+[data-theme="dark"] .metric-mini{background:var(--bg-3)}
+[data-theme="dark"] .c-row:hover{background:rgba(255,255,255,0.02)}
+[data-theme="dark"] .c-row + .c-row{border-top-color:rgba(255,255,255,0.04)}
+[data-theme="dark"] .detail-list .c-row:hover{background:rgba(255,255,255,0.02)}
+[data-theme="dark"] .detail-list .c-row + .c-row{border-top-color:rgba(255,255,255,0.04)}
+[data-theme="dark"] .pill-neutral{background:rgba(255,255,255,0.04);color:var(--t2)}
+[data-theme="dark"] .gas-bar{background:var(--bg-4)}
+[data-theme="dark"] .fee-breakdown{background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .fee-row + .fee-row{border-top-color:rgba(255,255,255,0.04)}
+[data-theme="dark"] .fee-row.fee-total{border-top-color:rgba(255,255,255,0.08)}
+[data-theme="dark"] .fee-formula{background:rgba(20,20,45,0.95);border-color:rgba(255,255,255,0.1)}
+[data-theme="dark"] .fee-formula::after{border-top-color:rgba(255,255,255,0.1)}
+[data-theme="dark"] .fee-savings{background:linear-gradient(135deg,rgba(0,192,96,0.06),rgba(153,51,255,0.04));border-color:rgba(0,192,96,0.1)}
+[data-theme="dark"] .fee-wasted{background:rgba(255,64,128,0.06);border-color:rgba(255,64,128,0.1)}
+[data-theme="dark"] .easy-bubble-inner{background:linear-gradient(135deg, rgba(153,51,255,0.06), rgba(0,192,255,0.04));border-color:rgba(153,51,255,0.1)}
+[data-theme="dark"] .easy-bubble-inner::before{background:linear-gradient(135deg, rgba(153,51,255,0.06), rgba(0,192,255,0.04));border-left-color:rgba(153,51,255,0.1);border-top-color:rgba(153,51,255,0.1)}
+[data-theme="dark"] .easy-bubble .sub-note{border-top-color:rgba(255,255,255,0.04)}
+[data-theme="dark"] .swap-visual{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .swap-token{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .swap-rate-bar{background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .data-table{background:var(--bg-2)}
+[data-theme="dark"] .data-table thead{background:var(--bg-3)}
+[data-theme="dark"] .data-table td{border-bottom-color:rgba(255,255,255,0.04)}
+[data-theme="dark"] .data-table tr:hover td{background:rgba(255,255,255,0.02)}
+[data-theme="dark"] .detail-tabs{border-bottom-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .tab-count{background:rgba(255,255,255,0.06)}
+[data-theme="dark"] .log-full{background:var(--bg-2)}
+[data-theme="dark"] .log-full-header:hover{background:rgba(255,255,255,0.02)}
+[data-theme="dark"] .log-full-idx{background:var(--bg-4)}
+[data-theme="dark"] .log-full-body{border-top-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .log-hex{background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .empty-state{background:var(--bg-2)}
+[data-theme="dark"] .alert-banner.warn{background:rgba(245,158,11,0.06);border-color:rgba(245,158,11,0.12)}
+[data-theme="dark"] .alert-banner.info{background:rgba(0,96,255,0.06);border-color:rgba(0,96,255,0.12)}
+[data-theme="dark"] .alert-banner.error{background:rgba(255,64,128,0.06);border-color:rgba(255,64,128,0.12)}
+[data-theme="dark"] .badge-eip{background:var(--accent-dim);color:var(--accent)}
+[data-theme="dark"] .badge-legacy{background:rgba(255,255,255,0.04);color:var(--t2);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .nft-transfer-card{background:var(--bg-2)}
+[data-theme="dark"] .nft-thumb{background:linear-gradient(135deg,var(--bg-3),var(--bg-4))}
+[data-theme="dark"] .expand-toggle{border-top-color:rgba(255,255,255,0.04)}
+[data-theme="dark"] .swap-page-icon{background:rgba(153,51,255,0.15);border-color:rgba(153,51,255,0.15)}
+[data-theme="dark"] .swap-stat{background:var(--bg-2)}
+[data-theme="dark"] .swap-filter-group{background:var(--bg-2);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .swap-filter-btn.active{background:var(--brand-dim);color:var(--brand-light)}
+[data-theme="dark"] .swap-filter-btn:hover:not(.active){background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .swap-search{background:var(--bg-2);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .swap-tx-row{background:var(--bg-2);box-shadow:var(--shadow-sm)}
+[data-theme="dark"] .swap-tx-row:hover{background:var(--bg-3)}
+[data-theme="dark"] .swap-tx-item.open .swap-tx-row{background:var(--bg-3)}
+[data-theme="dark"] .swap-tx-detail{background:var(--bg-1)}
+[data-theme="dark"] .swap-row-icon{border-color:rgba(20,20,45,0.85)}
+[data-theme="dark"] .swap-widget{background:var(--bg-2);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .sw-settings:hover{background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .sw-input-box{background:rgba(255,255,255,0.04);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .sw-token-btn{background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.08)}
+[data-theme="dark"] .sw-token-btn:hover{background:rgba(255,255,255,0.10)}
+[data-theme="dark"] .sw-arrow-btn{background:var(--bg-3);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .sw-rate{background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .sw-detail-row + .sw-detail-row{border-top-color:rgba(255,255,255,0.04)}
+[data-theme="dark"] .sw-slip-btn:hover:not(.active){background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .sw-settings-panel{border-top-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .sw-footer{border-top-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .status-switcher{background:var(--bg-2);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .status-switcher button:hover:not(.active){background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .fail-reason-box{background:rgba(255,64,128,0.06);border-color:rgba(255,64,128,0.1)}
+[data-theme="dark"] .fail-reason-code{background:rgba(255,255,255,0.04)}
+[data-theme="dark"] .fail-cost-note{border-top-color:rgba(255,255,255,0.04)}
+[data-theme="dark"] .detail-separator-label{background:var(--bg-3);border-color:rgba(255,255,255,0.06)}
+[data-theme="dark"] .hero-tx-id-hash{background:rgba(255,255,255,0.06)}
+[data-theme="dark"] .hero-tx-id-hash:hover{background:rgba(255,255,255,0.10)}
+
+/* ═══ Responsive ═══ */
+@media(max-width:700px){
+  .page{padding:16px}
+  .top-horizontal{grid-template-columns:1fr}
+  .hero-status{padding:20px;border-radius:var(--r-lg)}
+  .hero-usd{font-size:30px}
+  .bento-grid{grid-template-columns:1fr}
+  .bento-gas{grid-row:auto;grid-column:auto}
+  .metric-grid{grid-template-columns:1fr}
+  .search-bar,.nav,.net-badge{display:none}
+  .header{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo"><div class="logo-icon">E</div>Explorer</div>
+    <nav class="nav">
+      <a href="transactions.html">Transactions</a><a href="swap.html" class="active">Swap</a><a href="block-detail.html">Blocks</a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <div class="search-bar">
+      <i data-lucide="search"></i>
+      <input placeholder="Search by address, tx hash, block, token...">
+      <span class="kbd">&#x2318;K</span>
+    </div>
+    <div class="net-badge"><span class="net-dot"></span>Ethereum Mainnet</div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+      <span class="icon-sun"><i data-lucide="sun"></i></span>
+      <span class="icon-moon"><i data-lucide="moon"></i></span>
+    </button>
+    <button class="h-btn">Connect Wallet</button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="breadcrumb"><a href="#">Home</a><span>&#x203A;</span><a href="#">Transactions</a><span>&#x203A;</span><span style="color:var(--t2)">Swaps</span></div>
+
+  <!-- Page Header -->
+  <div class="swap-page-header">
+    <div class="swap-page-title">
+      <div class="swap-page-icon"><i data-lucide="arrow-left-right"></i></div>
+      <div><h1>Swap Transactions</h1><p>Recent token swap activity on Ethereum Mainnet</p></div>
+    </div>
+    <div class="swap-page-stats">
+      <div class="swap-stat"><div class="swap-stat-val">6</div><div class="swap-stat-label">Total</div></div>
+      <div class="swap-stat"><div class="swap-stat-val" style="color:var(--success)">4</div><div class="swap-stat-label">Success</div></div>
+      <div class="swap-stat"><div class="swap-stat-val" style="color:var(--error)">2</div><div class="swap-stat-label">Failed</div></div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="swap-filter-bar">
+    <div class="swap-filter-group">
+      <button class="swap-filter-btn active" onclick="filterSwaps('all',this)">All Pairs</button>
+      <button class="swap-filter-btn" onclick="filterSwaps('eth-usdc',this)">ETH/USDC</button>
+      <button class="swap-filter-btn" onclick="filterSwaps('wbtc-eth',this)">WBTC/ETH</button>
+      <button class="swap-filter-btn" onclick="filterSwaps('stables',this)">Stables</button>
+    </div>
+    <div class="swap-filter-sep"></div>
+    <div class="swap-filter-group">
+      <button class="swap-filter-btn active" onclick="filterStatus('all',this)">All</button>
+      <button class="swap-filter-btn" onclick="filterStatus('success',this)"><i data-lucide="check-circle" style="width:10px;height:10px"></i> Success</button>
+      <button class="swap-filter-btn" onclick="filterStatus('failed',this)"><i data-lucide="x-circle" style="width:10px;height:10px"></i> Failed</button>
+    </div>
+    <div class="swap-search"><i data-lucide="search"></i><input placeholder="Search by hash, token..." oninput="searchSwaps(this.value)"></div>
+  </div>
+
+  <!-- Two-Column Layout: List + Swap Widget -->
+  <div class="page-layout">
+  <div class="page-main">
+
+  <div class="swap-tx-list">
+
+    <!-- ═══ TX1: ETH→USDC Success (Expanded) ═══ -->
+    <div class="swap-tx-item open" data-pair="eth-usdc" data-status="success" data-search="0x7a3d12f84e21 eth usdc uniswap">
+      <div class="swap-tx-row" onclick="toggleSwapDetail(this)">
+        <div class="swap-row-status status-ok"></div>
+        <div class="swap-row-pair">
+          <div class="swap-row-icons"><span class="swap-row-icon icon-eth">E</span><span class="swap-row-icon icon-usdc">$</span></div>
+          <div class="swap-row-pair-text"><span class="swap-row-pair-label">ETH &#x2192; USDC</span><span class="swap-row-dex">Uniswap V3</span></div>
+        </div>
+        <div class="swap-row-amount">0.05 ETH &#x2192; 97.91 USDC</div>
+        <div class="swap-row-value"><div class="swap-row-time">1 min ago</div></div>
+        <div class="swap-row-chevron"><i data-lucide="chevron-down"></i></div>
+      </div>
+      <div class="swap-tx-detail">
+        <!-- Hero + Flow -->
+        <div class="top-horizontal">
+          <div class="hero-status success type-swap">
+            <div class="hero-top">
+              <div class="hero-top-left">
+                <div class="hero-type-icon"><i data-lucide="arrow-left-right"></i></div>
+                <div class="hero-status-text">
+                  <h2>Token Swap</h2>
+                  <p><i data-lucide="check-circle"></i> Transaction Confirmed</p>
+                </div>
+              </div>
+              <span class="hero-timestamp">1 min ago</span>
+            </div>
+            <div class="hero-amount-section">
+              <div class="hero-amount-label">Swap Amount</div>
+              <div class="hero-amount"><span class="hero-usd">$2,937</span><span class="hero-native">1.5 ETH &#x2192; 2,937.42 USDC <span style="color:var(--t3)">(via Uniswap V3)</span></span></div>
+            </div>
+            <div class="hero-tx-identity">
+              <span class="hero-tx-id-label">Transaction</span>
+              <span class="hero-tx-id-hash" onclick="copyText('0x7a3d12f84e21')">0x7a3d12...f84e21 <i data-lucide="copy"></i></span>
+              <span class="hero-tx-id-sep">&#xB7;</span>
+              <span class="hero-tx-id-label">Block</span>
+              <span class="hero-tx-id-block">24,430,952</span>
+            </div>
+          </div>
+          <div class="swap-detail-card">
+            <div class="card-header">
+              <span class="card-title"><i data-lucide="arrow-left-right"></i>Transaction Flow</span>
+              <span class="card-badge badge-protocol">Uniswap V3</span>
+            </div>
+            <div class="swap-visual">
+              <div class="swap-pair">
+                <div class="swap-token"><div class="swap-token-icon icon-eth">E</div><div><div class="swap-token-amount">0.05 ETH</div><div class="swap-token-name">&#x2248; $97.91</div></div></div>
+                <div class="swap-arrow"><i data-lucide="arrow-right" style="color:var(--brand)"></i></div>
+                <div class="swap-token"><div class="swap-token-icon icon-usdc">$</div><div><div class="swap-token-amount">97.91 USDC</div><div class="swap-token-name">&#x2248; $97.91</div></div></div>
+              </div>
+              <div class="swap-rate-bar">Rate <strong>1 ETH = 1,958.28 USDC</strong> &#xB7; Slippage <strong>0.08%</strong> <span class="pill pill-success">Good</span></div>
+            </div>
+            <div class="card-rows">
+              <div class="c-row"><span class="c-row-key">Liquidity Pool</span><span class="c-row-val">ETH/USDC 0.3%</span></div>
+              <div class="c-row"><span class="c-row-key">Min. Received</span><span class="c-row-val">97.42 USDC</span></div>
+              <div class="c-row"><span class="c-row-key">Price Impact</span><span class="c-row-val" style="color:var(--success)">-0.01%</span></div>
+            </div>
+          </div>
+        </div><!-- /top-horizontal -->
+
+        <!-- Detail Tabs -->
+        <div class="detail-tabs">
+          <button class="active" onclick="switchTab(this,'t-s1-overview')">Overview</button>
+          <button onclick="switchTab(this,'t-s1-tokens')">Token Transfers <span class="tab-count">2</span></button>
+          <button onclick="switchTab(this,'t-s1-nft')">NFT Transfers</button>
+          <button onclick="switchTab(this,'t-s1-internal')">Internal TX <span class="tab-count">1</span></button>
+          <button onclick="switchTab(this,'t-s1-logs')">Logs <span class="tab-count">5</span></button>
+        </div>
+
+        <!-- Tab: Overview -->
+        <div class="tab-panel active" id="t-s1-overview">
+          <div class="bento-grid">
+            <div class="bento-card">
+              <div class="card-header"><span class="card-title"><i data-lucide="file-text"></i>Transaction Details</span></div>
+              <div class="detail-list">
+                <div class="c-row"><span class="c-row-key">Fee</span><div class="c-row-val">$3.82 <span class="mono" style="font-size:11px;color:var(--t3);margin-left:4px">0.00195 ETH</span> <span class="pill pill-warning">Average</span></div></div>
+                <div class="c-row"><span class="c-row-key">Time</span><div class="c-row-val">1 min ago <span style="font-size:11px;color:var(--t3);margin-left:4px">2026.02.21 13:38 UTC</span></div></div>
+                <div class="c-row"><span class="c-row-key">Confirmations</span><div class="c-row-val">52 Blocks <span class="pill pill-success">Safe</span></div></div>
+                <div class="c-row"><span class="c-row-key">Network</span><div class="c-row-val">Ethereum <span style="font-size:11px;color:var(--t3);margin-left:4px">Mainnet</span></div></div>
+              </div>
+              <div class="detail-separator"><span class="detail-separator-line"></span><span class="detail-separator-label">More Details</span><span class="detail-separator-line"></span></div>
+              <div class="detail-list" style="padding-bottom:8px">
+                <div class="c-row"><span class="c-row-key">Gas Price</span><span class="c-row-val mono">12.4 Gwei</span></div>
+                <div class="c-row"><span class="c-row-key">Gas Used</span><div class="c-row-val"><span class="mono">157,320 / 200,000</span><span class="pill pill-info">79%</span></div></div>
+                <div class="c-row"><span class="c-row-key">Value</span><span class="c-row-val mono">0.05 ETH ($97.91)</span></div>
+                <div class="c-row"><span class="c-row-key">Nonce</span><span class="c-row-val mono">87</span></div>
+                <div class="c-row"><span class="c-row-key">Input Data</span><span class="c-row-val mono">0x5ae401dc... (Swap)</span></div>
+              </div>
+            </div>
+            <div class="bento-card bento-gas">
+              <div class="card-header"><span class="card-title"><i data-lucide="receipt"></i>Fee Breakdown</span></div>
+              <div class="gas-section">
+                <div class="gas-usage">
+                  <div class="gas-usage-header"><span class="gas-usage-label">Resource Usage</span><span class="gas-usage-nums">157,320 / 200,000</span></div>
+                  <div class="gas-bar"><div class="gas-bar-fill" style="width:79%"></div></div>
+                  <div class="gas-pct"><span class="gas-pct-val">79% used</span><span class="gas-pct-badge gas-eff-good">Efficient</span></div>
+                  <div class="gas-desc">Completed with room to spare</div>
+                </div>
+                <div class="fee-breakdown">
+                  <div class="fee-row"><span class="fee-key">Base Fee</span><span class="fee-val">$3.45 <span class="fee-gwei">(11.2 Gwei)</span></span></div>
+                  <div class="fee-row"><span class="fee-key">Priority Fee (Tip)</span><span class="fee-val">$0.37 <span class="fee-gwei">(1.2 Gwei)</span></span></div>
+                  <div class="fee-row fee-total"><span class="fee-key fee-total-key">Total Fee <span class="fee-info-wrap"><i data-lucide="info"></i><span class="fee-formula"><span class="formula-label">How is this calculated?</span><span class="formula-calc">157,320 gas &#xD7; 12.4 Gwei</span><span class="formula-result">= 0.00195 ETH &#x2248; $3.82</span></span></span></span><span class="fee-val">$3.82 <span class="fee-sub">(0.00195 ETH)</span></span></div>
+                </div>
+                <div class="fee-savings"><div class="savings-main"><i data-lucide="piggy-bank"></i> Saved $0.87</div><div class="savings-detail">You set max $4.69 &#x2014; only $3.82 charged</div></div>
+              </div>
+              <div class="easy-bubble"><div class="easy-bubble-inner">
+                <div class="easy-label"><span class="ai-dot"></span> In Simple Terms</div>
+                <p>Swapped <span class="hl">0.05 ETH</span> for <span class="hl">97.91 USDC</span> on Uniswap. Rate: 1,958 USDC per ETH, slippage 0.08% &#x2014; Good.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Token Transfers -->
+        <div class="tab-panel" id="t-s1-tokens">
+          <table class="data-table">
+            <thead><tr><th>From</th><th>To</th><th>Type</th><th>Amount</th><th>Token</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="addr">0xAb3F...c210</span></td>
+                <td><span class="addr">Uniswap V3 Pool</span></td>
+                <td><span class="type-badge type-out">OUT</span></td>
+                <td>0.05</td>
+                <td><div class="token-cell"><span class="flow-token-icon icon-eth" style="width:18px;height:18px;font-size:8px">E</span> WETH</div></td>
+              </tr>
+              <tr>
+                <td><span class="addr">Uniswap V3 Pool</span></td>
+                <td><span class="addr">0xAb3F...c210</span></td>
+                <td><span class="type-badge type-in">IN</span></td>
+                <td>97.91</td>
+                <td><div class="token-cell"><span class="flow-token-icon icon-usdc" style="width:18px;height:18px;font-size:8px">$</span> USDC</div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tab: NFT Transfers -->
+        <div class="tab-panel" id="t-s1-nft">
+          <div class="empty-state">
+            <div class="empty-state-icon"><i data-lucide="image"></i></div>
+            <div class="empty-state-text">No NFT Transfers</div>
+            <div class="empty-state-sub">No NFT transfers occurred in this transaction</div>
+          </div>
+        </div>
+
+        <!-- Tab: Internal TX -->
+        <div class="tab-panel" id="t-s1-internal">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Type</th><th>From</th><th>To</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>0</td>
+                <td><span class="pill pill-brand">CALL</span></td>
+                <td><span class="addr">Uniswap V3 Router</span></td>
+                <td><span class="addr">Uniswap V3 Pool</span></td>
+                <td>1.5 ETH</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tab: Logs (All 5) -->
+        <div class="tab-panel" id="t-s1-logs">
+          <div class="log-full open">
+            <div class="log-full-header" onclick="this.parentElement.classList.toggle('open')">
+              <div style="display:flex;align-items:center">
+                <div class="log-full-idx">0</div>
+                <div class="log-full-meta"><span class="log-full-event">Swap</span><span class="log-full-contract">Uniswap V3 Pool</span></div>
+              </div>
+              <i data-lucide="chevron-down" class="log-full-toggle"></i>
+            </div>
+            <div class="log-full-body">
+              <div class="log-section-label">Address</div>
+              <div class="log-hex">0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640</div>
+              <div class="log-section-label">Topics</div>
+              <div class="log-topic"><span class="log-topic-idx">0</span><span class="log-topic-val">0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67</span></div>
+              <div class="log-topic"><span class="log-topic-idx">1</span><span class="log-topic-val">0x000000000000000000000000e592427a0aece92de3edee1f18e0157c05861564</span></div>
+              <div class="log-topic"><span class="log-topic-idx">2</span><span class="log-topic-val">0x000000000000000000000000ab3fc21c9084fce16873ee1e2691698d2c041c10</span></div>
+              <div class="log-section-label">Data</div>
+              <div class="log-hex">0x00000000000000000000000000000000000000000000000014d1120d7b160000fffffffffffffffffffffffffffffffffffffffffffffffffffff4a7e48f18...</div>
+            </div>
+          </div>
+          <div class="log-full">
+            <div class="log-full-header" onclick="this.parentElement.classList.toggle('open')">
+              <div style="display:flex;align-items:center">
+                <div class="log-full-idx">1</div>
+                <div class="log-full-meta"><span class="log-full-event">Transfer</span><span class="log-full-contract">WETH</span></div>
+              </div>
+              <i data-lucide="chevron-down" class="log-full-toggle"></i>
+            </div>
+            <div class="log-full-body">
+              <div class="log-section-label">Address</div>
+              <div class="log-hex">0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2</div>
+              <div class="log-section-label">Topics</div>
+              <div class="log-topic"><span class="log-topic-idx">0</span><span class="log-topic-val">0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef</span></div>
+              <div class="log-topic"><span class="log-topic-idx">1</span><span class="log-topic-val">0x000000000000000000000000ab3fc21c9084fce16873ee1e2691698d2c041c10</span></div>
+              <div class="log-topic"><span class="log-topic-idx">2</span><span class="log-topic-val">0x00000000000000000000000088e6a0c2ddd26feeb64f039a2c41296fcb3f5640</span></div>
+              <div class="log-section-label">Data</div>
+              <div class="log-hex">0x00000000000000000000000000000000000000000000000014d1120d7b160000</div>
+            </div>
+          </div>
+          <div class="log-full">
+            <div class="log-full-header" onclick="this.parentElement.classList.toggle('open')">
+              <div style="display:flex;align-items:center">
+                <div class="log-full-idx">2</div>
+                <div class="log-full-meta"><span class="log-full-event">Transfer</span><span class="log-full-contract">USDC</span></div>
+              </div>
+              <i data-lucide="chevron-down" class="log-full-toggle"></i>
+            </div>
+            <div class="log-full-body">
+              <div class="log-section-label">Address</div>
+              <div class="log-hex">0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48</div>
+              <div class="log-section-label">Topics</div>
+              <div class="log-topic"><span class="log-topic-idx">0</span><span class="log-topic-val">0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef</span></div>
+              <div class="log-topic"><span class="log-topic-idx">1</span><span class="log-topic-val">0x00000000000000000000000088e6a0c2ddd26feeb64f039a2c41296fcb3f5640</span></div>
+              <div class="log-topic"><span class="log-topic-idx">2</span><span class="log-topic-val">0x000000000000000000000000ab3fc21c9084fce16873ee1e2691698d2c041c10</span></div>
+              <div class="log-section-label">Data</div>
+              <div class="log-hex">0x000000000000000000000000000000000000000000000000000000aee5d90e00</div>
+            </div>
+          </div>
+          <div class="log-full">
+            <div class="log-full-header" onclick="this.parentElement.classList.toggle('open')">
+              <div style="display:flex;align-items:center">
+                <div class="log-full-idx">3</div>
+                <div class="log-full-meta"><span class="log-full-event">Deposit</span><span class="log-full-contract">WETH</span></div>
+              </div>
+              <i data-lucide="chevron-down" class="log-full-toggle"></i>
+            </div>
+            <div class="log-full-body">
+              <div class="log-section-label">Address</div>
+              <div class="log-hex">0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2</div>
+              <div class="log-section-label">Topics</div>
+              <div class="log-topic"><span class="log-topic-idx">0</span><span class="log-topic-val">0xe1fffcc4923d04b559f4d29a8bfc6cda04eb5b0d3c460751c2402c5c5cc9109c</span></div>
+              <div class="log-topic"><span class="log-topic-idx">1</span><span class="log-topic-val">0x000000000000000000000000e592427a0aece92de3edee1f18e0157c05861564</span></div>
+              <div class="log-section-label">Data</div>
+              <div class="log-hex">0x00000000000000000000000000000000000000000000000014d1120d7b160000</div>
+            </div>
+          </div>
+          <div class="log-full">
+            <div class="log-full-header" onclick="this.parentElement.classList.toggle('open')">
+              <div style="display:flex;align-items:center">
+                <div class="log-full-idx">4</div>
+                <div class="log-full-meta"><span class="log-full-event">Sync</span><span class="log-full-contract">Uniswap V3 Pool</span></div>
+              </div>
+              <i data-lucide="chevron-down" class="log-full-toggle"></i>
+            </div>
+            <div class="log-full-body">
+              <div class="log-section-label">Address</div>
+              <div class="log-hex">0x88e6A0c2dDD26FEEb64F039a2c41296FcB3f5640</div>
+              <div class="log-section-label">Topics</div>
+              <div class="log-topic"><span class="log-topic-idx">0</span><span class="log-topic-val">0x1c411e9a96e071241c2f21f7726b17ae89e3cab4c78be50e062b03a9fffbbad1</span></div>
+              <div class="log-section-label">Data</div>
+              <div class="log-hex">0x000000000000000000000000000000000000000000001a7e8d0e19e6c0d1cf0e00000000000000000000000000000000000000000000000034bc4fdde7720000</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /swap-tx-detail TX1 -->
+    </div><!-- /swap-tx-item TX1 -->
+
+    <!-- ═══ TX2: USDC→ETH Success (Collapsed) ═══ -->
+    <div class="swap-tx-item" data-pair="eth-usdc" data-status="success" data-search="0x2b8f44e29a10 usdc eth uniswap">
+      <div class="swap-tx-row" onclick="toggleSwapDetail(this)">
+        <div class="swap-row-status status-ok"></div>
+        <div class="swap-row-pair">
+          <div class="swap-row-icons"><span class="swap-row-icon icon-usdc">$</span><span class="swap-row-icon icon-eth">E</span></div>
+          <div class="swap-row-pair-text"><span class="swap-row-pair-label">USDC &#x2192; ETH</span><span class="swap-row-dex">Uniswap V3</span></div>
+        </div>
+        <div class="swap-row-amount">150 USDC &#x2192; 0.077 ETH</div>
+        <div class="swap-row-value"><div class="swap-row-time">4 mins ago</div></div>
+        <div class="swap-row-chevron"><i data-lucide="chevron-down"></i></div>
+      </div>
+      <div class="swap-tx-detail"></div>
+    </div>
+
+    <!-- ═══ TX3: WBTC→ETH Failed (Collapsed, with detail) ═══ -->
+    <div class="swap-tx-item" data-pair="wbtc-eth" data-status="failed" data-search="0x9c1e55d73b82 wbtc eth sushiswap">
+      <div class="swap-tx-row" onclick="toggleSwapDetail(this)">
+        <div class="swap-row-status status-fail"></div>
+        <div class="swap-row-pair">
+          <div class="swap-row-icons"><span class="swap-row-icon icon-wbtc">B</span><span class="swap-row-icon icon-eth">E</span></div>
+          <div class="swap-row-pair-text"><span class="swap-row-pair-label">WBTC &#x2192; ETH</span><span class="swap-row-dex">SushiSwap</span></div>
+        </div>
+        <div class="swap-row-amount failed">0.003 WBTC &#x2192; ~0.056 ETH</div>
+        <div class="swap-row-value"><div class="swap-row-time">8 mins ago</div></div>
+        <div class="swap-row-chevron"><i data-lucide="chevron-down"></i></div>
+      </div>
+      <div class="swap-tx-detail">
+        <!-- Hero + Flow (Failed) -->
+        <div class="top-horizontal">
+          <div class="hero-status failed type-swap">
+            <div class="hero-top">
+              <div class="hero-top-left">
+                <div class="hero-type-icon"><i data-lucide="arrow-left-right"></i></div>
+                <div class="hero-status-text">
+                  <h2>Token Swap</h2>
+                  <p><i data-lucide="x-circle"></i> Transaction Failed</p>
+                </div>
+              </div>
+              <span class="hero-timestamp">8 mins ago</span>
+            </div>
+            <div class="hero-amount-section">
+              <div class="hero-amount-label">Attempted Amount</div>
+              <div class="hero-amount"><span class="hero-usd" style="opacity:0.4;text-decoration:line-through">$168</span><span class="hero-native" style="opacity:0.5">0.003 WBTC &#x2192; ETH swap failed</span></div>
+            </div>
+            <div class="hero-tx-identity">
+              <span class="hero-tx-id-label">Transaction</span>
+              <span class="hero-tx-id-hash" onclick="copyText('0x9c1e55d73b82')">0x9c1e55...d73b82 <i data-lucide="copy"></i></span>
+              <span class="hero-tx-id-sep">&#xB7;</span>
+              <span class="hero-tx-id-label">Block</span>
+              <span class="hero-tx-id-block">24,430,910</span>
+            </div>
+          </div>
+          <div class="swap-detail-card swap-detail-failed">
+            <div class="card-header">
+              <span class="card-title"><i data-lucide="arrow-left-right"></i>Transaction Flow</span>
+              <span class="card-badge" style="background:var(--error-dim);color:var(--error)">Failed</span>
+            </div>
+            <div class="swap-visual">
+              <div class="swap-pair">
+                <div class="swap-token" style="opacity:0.5"><div class="swap-token-icon icon-wbtc">B</div><div><div class="swap-token-amount" style="text-decoration:line-through">0.003 WBTC</div><div class="swap-token-name">Refunded</div></div></div>
+                <div class="swap-arrow" style="background:var(--error-dim);border-color:rgba(255,64,128,0.15);animation:none"><i data-lucide="x" style="color:var(--error)"></i></div>
+                <div class="swap-token" style="opacity:0.3"><div class="swap-token-icon icon-eth">E</div><div><div class="swap-token-amount" style="text-decoration:line-through">~0.056 ETH</div><div class="swap-token-name">ETH &#x2014; Not received</div></div></div>
+              </div>
+              <div class="swap-rate-bar" style="border:1px solid rgba(255,64,128,0.1)">Failure reason <strong style="color:var(--error)">Slippage 2.6% > Tolerance 0.5%</strong> &#xB7; Price volatility detected</div>
+            </div>
+            <div class="card-rows">
+              <div class="c-row"><span class="c-row-key">Revert Reason</span><span class="c-row-val" style="color:var(--error)">Insufficient output amount</span></div>
+              <div class="c-row"><span class="c-row-key">Min. Output</span><span class="c-row-val">0.054 ETH</span></div>
+              <div class="c-row"><span class="c-row-key">Actual Output</span><span class="c-row-val" style="color:var(--error)">0.053 ETH (-2.6%)</span></div>
+            </div>
+          </div>
+        </div><!-- /top-horizontal -->
+
+        <div class="alert-banner error show">
+          <div class="alert-icon-wrap"><i data-lucide="alert-triangle"></i></div>
+          <span><strong>Slippage Exceeded</strong> &#x2014; Price movement during the trade exceeded the slippage tolerance (0.5%), causing the swap to be automatically cancelled. <strong>Only the fee of $6.84 was deducted</strong>.</span>
+        </div>
+
+        <div class="detail-tabs">
+          <button class="active" onclick="switchTab(this,'t-s3-overview')">Overview</button>
+          <button onclick="switchTab(this,'t-s3-tokens')">Token Transfers</button>
+          <button onclick="switchTab(this,'t-s3-logs')">Logs</button>
+        </div>
+
+        <div class="tab-panel active" id="t-s3-overview">
+          <div class="bento-grid">
+            <div class="bento-card">
+              <div class="card-header"><span class="card-title"><i data-lucide="file-text"></i>Transaction Details</span></div>
+              <div class="detail-list">
+                <div class="c-row"><span class="c-row-key">Fee (Consumed)</span><div class="c-row-val" style="color:var(--error)">$6.84 <span class="mono" style="font-size:11px;color:var(--t3);margin-left:4px">0.00351 ETH</span> <span class="pill pill-error">Non-refundable</span></div></div>
+                <div class="c-row"><span class="c-row-key">Time</span><div class="c-row-val">8 mins ago <span style="font-size:11px;color:var(--t3);margin-left:4px">2026.02.21 13:31 UTC</span></div></div>
+                <div class="c-row"><span class="c-row-key">Execution Result</span><div class="c-row-val" style="color:var(--error);font-weight:700">Reverted <span style="font-size:11px;color:var(--t3);margin-left:4px;font-weight:400">Slippage exceeded</span> <span class="pill pill-error">Failed</span></div></div>
+                <div class="c-row"><span class="c-row-key">Token Transfer</span><div class="c-row-val">$0 <span style="font-size:11px;color:var(--t3);margin-left:4px">Not exchanged</span> <span class="pill pill-neutral">Refunded</span></div></div>
+              </div>
+              <div class="detail-separator"><span class="detail-separator-line"></span><span class="detail-separator-label">More Details</span><span class="detail-separator-line"></span></div>
+              <div class="detail-list" style="padding-bottom:8px">
+                <div class="c-row"><span class="c-row-key">Gas Price</span><span class="c-row-val mono">14.1 Gwei</span></div>
+                <div class="c-row"><span class="c-row-key">Gas Used</span><div class="c-row-val"><span class="mono">249,000 / 249,000</span><span class="pill pill-error">100% used</span></div></div>
+                <div class="c-row"><span class="c-row-key">Value</span><span class="c-row-val mono">0 ETH</span></div>
+                <div class="c-row"><span class="c-row-key">Nonce</span><span class="c-row-val mono">142</span></div>
+                <div class="c-row"><span class="c-row-key">Input Data</span><span class="c-row-val mono">0x38ed1739... (Swap)</span></div>
+              </div>
+            </div>
+            <div class="bento-card bento-gas">
+              <div class="card-header"><span class="card-title"><i data-lucide="receipt"></i>Fee Breakdown</span></div>
+              <div class="gas-section">
+                <div class="gas-usage">
+                  <div class="gas-usage-header"><span class="gas-usage-label">Gas Used</span><span class="gas-usage-nums">249,000 / 249,000</span></div>
+                  <div class="gas-bar"><div class="gas-bar-fill fail" style="width:100%"></div></div>
+                  <div class="gas-pct"><span class="gas-pct-val">100% exhausted</span><span class="gas-pct-badge gas-eff-bad">Reverted</span></div>
+                </div>
+                <div class="fee-breakdown">
+                  <div class="fee-row"><span class="fee-key">Base Fee</span><span class="fee-val">$6.10 <span class="fee-gwei">(12.9 Gwei)</span></span></div>
+                  <div class="fee-row"><span class="fee-key">Priority Fee (Tip)</span><span class="fee-val">$0.74 <span class="fee-gwei">(1.2 Gwei)</span></span></div>
+                  <div class="fee-row fee-total"><span class="fee-key fee-total-key">Consumed Fee <span class="fee-info-wrap"><i data-lucide="info"></i><span class="fee-formula"><span class="formula-label">How is this calculated?</span><span class="formula-calc">249,000 gas &#xD7; 14.1 Gwei</span><span class="formula-result">= 0.00351 ETH &#x2248; $6.84</span></span></span></span><span class="fee-val" style="color:var(--error)">$6.84 <span class="fee-sub">(0.00351 ETH)</span></span></div>
+                </div>
+                <div class="fee-wasted"><div class="wasted-main"><i data-lucide="alert-triangle"></i> $6.84 consumed (non-refundable)</div><div class="wasted-detail">Gas was consumed before failure &#x2014; fee cannot be recovered</div></div>
+              </div>
+              <div class="fail-reason-box">
+                <div class="fail-reason-label"><i data-lucide="alert-triangle"></i> Failure Reason</div>
+                <p style="font-size:12px;color:var(--t1);line-height:1.6">Token price changed rapidly during swap execution, failing to meet the minimum output (2.72 ETH).</p>
+                <div class="fail-reason-code">Error: STF (SushiSwap: INSUFFICIENT_OUTPUT_AMOUNT)<br>MinOut: 0.054 ETH<br>Actual: 0.053 ETH (-2.6%)</div>
+              </div>
+              <div class="easy-bubble"><div class="easy-bubble-inner">
+                <div class="easy-label"><span class="ai-dot"></span> In Simple Terms</div>
+                <p><span class="hl" style="color:var(--error)">WBTC&#x2192;ETH swap failed</span>. The price changed too much during execution and was automatically cancelled. <span class="hl">0.003 WBTC was returned</span>, but <span class="hl-warn">a fee of $6.84 was deducted</span>.</p>
+                <p class="sub-note">Increasing the slippage tolerance to 1&#x2013;2% improves the success rate.</p>
+              </div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="t-s3-tokens">
+          <div class="empty-state"><div class="empty-state-icon"><i data-lucide="x-circle"></i></div><div class="empty-state-text">No Token Transfers</div><div class="empty-state-sub">Swap failed &#x2014; no token exchange occurred</div></div>
+        </div>
+        <div class="tab-panel" id="t-s3-logs">
+          <div class="empty-state"><div class="empty-state-icon"><i data-lucide="file-text"></i></div><div class="empty-state-text">No Event Logs</div><div class="empty-state-sub">Transaction was reverted &#x2014; no events recorded</div></div>
+        </div>
+
+      </div><!-- /swap-tx-detail TX3 -->
+    </div><!-- /swap-tx-item TX3 -->
+
+    <!-- ═══ TX4: ETH→DAI Success (Collapsed) ═══ -->
+    <div class="swap-tx-item" data-pair="eth-dai" data-status="success" data-search="0x4e7a22f10c35 eth dai 1inch">
+      <div class="swap-tx-row" onclick="toggleSwapDetail(this)">
+        <div class="swap-row-status status-ok"></div>
+        <div class="swap-row-pair">
+          <div class="swap-row-icons"><span class="swap-row-icon icon-eth">E</span><span class="swap-row-icon icon-dai">D</span></div>
+          <div class="swap-row-pair-text"><span class="swap-row-pair-label">ETH &#x2192; DAI</span><span class="swap-row-dex">1inch</span></div>
+        </div>
+        <div class="swap-row-amount">0.02 ETH &#x2192; 39.17 DAI</div>
+        <div class="swap-row-value"><div class="swap-row-time">15 mins ago</div></div>
+        <div class="swap-row-chevron"><i data-lucide="chevron-down"></i></div>
+      </div>
+      <div class="swap-tx-detail"></div>
+    </div>
+
+    <!-- ═══ TX5: USDT→USDC Success (Collapsed) ═══ -->
+    <div class="swap-tx-item" data-pair="stables" data-status="success" data-search="0x8d2c11a94f67 usdt usdc curve">
+      <div class="swap-tx-row" onclick="toggleSwapDetail(this)">
+        <div class="swap-row-status status-ok"></div>
+        <div class="swap-row-pair">
+          <div class="swap-row-icons"><span class="swap-row-icon icon-usdt">T</span><span class="swap-row-icon icon-usdc">$</span></div>
+          <div class="swap-row-pair-text"><span class="swap-row-pair-label">USDT &#x2192; USDC</span><span class="swap-row-dex">Curve</span></div>
+        </div>
+        <div class="swap-row-amount">80 USDT &#x2192; 79.98 USDC</div>
+        <div class="swap-row-value"><div class="swap-row-time">22 mins ago</div></div>
+        <div class="swap-row-chevron"><i data-lucide="chevron-down"></i></div>
+      </div>
+      <div class="swap-tx-detail"></div>
+    </div>
+
+    <!-- ═══ TX6: ETH→WBTC Failed (Collapsed) ═══ -->
+    <div class="swap-tx-item" data-pair="wbtc-eth" data-status="failed" data-search="0xf3a891c25d44 eth wbtc uniswap">
+      <div class="swap-tx-row" onclick="toggleSwapDetail(this)">
+        <div class="swap-row-status status-fail"></div>
+        <div class="swap-row-pair">
+          <div class="swap-row-icons"><span class="swap-row-icon icon-eth">E</span><span class="swap-row-icon icon-wbtc">B</span></div>
+          <div class="swap-row-pair-text"><span class="swap-row-pair-label">ETH &#x2192; WBTC</span><span class="swap-row-dex">Uniswap V3</span></div>
+        </div>
+        <div class="swap-row-amount failed">0.04 ETH &#x2192; ~0.002 WBTC</div>
+        <div class="swap-row-value"><div class="swap-row-time">35 mins ago</div></div>
+        <div class="swap-row-chevron"><i data-lucide="chevron-down"></i></div>
+      </div>
+      <div class="swap-tx-detail"></div>
+    </div>
+
+  </div><!-- /swap-tx-list -->
+  </div><!-- /page-main -->
+
+  <!-- ═══ Swap Widget ═══ -->
+  <div class="swap-widget">
+    <div class="sw-header">
+      <span class="sw-title"><i data-lucide="arrow-left-right"></i> Swap</span>
+      <button class="sw-settings" onclick="toggleSwapSettings()"><i data-lucide="settings"></i></button>
+    </div>
+
+    <!-- Settings Panel (hidden by default) -->
+    <div class="sw-settings-panel" id="sw-settings-panel">
+      <div class="sw-settings-title">Slippage Tolerance</div>
+      <div class="sw-slippage-row">
+        <button class="sw-slip-btn" onclick="setSlippage(0.1,this)">0.1%</button>
+        <button class="sw-slip-btn active" onclick="setSlippage(0.5,this)">0.5%</button>
+        <button class="sw-slip-btn" onclick="setSlippage(1.0,this)">1.0%</button>
+        <input class="sw-slip-custom" placeholder="Custom" type="text">
+      </div>
+      <div class="sw-settings-title">Transaction Deadline</div>
+      <div class="sw-deadline-row">
+        <input class="sw-deadline-input" value="30" type="text">
+        <span class="sw-deadline-label">minutes</span>
+      </div>
+    </div>
+
+    <div class="sw-body">
+      <!-- From Token -->
+      <div class="sw-input-box" id="sw-from">
+        <div class="sw-input-label">You Pay</div>
+        <div class="sw-input-row">
+          <input class="sw-input" type="text" placeholder="0" value="0.05" oninput="updateSwapOutput()">
+          <button class="sw-token-btn" onclick="openTokenSelect('from')">
+            <span class="sw-token-icon icon-eth">E</span>
+            <span class="sw-token-name" id="sw-from-token">ETH</span>
+            <i data-lucide="chevron-down"></i>
+          </button>
+        </div>
+        <div class="sw-balance">
+          <span class="sw-balance-text">Balance: 0.3124 ETH</span>
+          <span><span class="sw-balance-usd">~$611.78</span> <button class="sw-max-btn" onclick="setMaxBalance()">MAX</button></span>
+        </div>
+      </div>
+
+      <!-- Swap Direction Arrow -->
+      <div class="sw-arrow-wrap">
+        <button class="sw-arrow-btn" onclick="swapDirection()"><i data-lucide="arrow-down-up"></i></button>
+      </div>
+
+      <!-- To Token -->
+      <div class="sw-input-box" id="sw-to">
+        <div class="sw-input-label">You Receive</div>
+        <div class="sw-input-row">
+          <input class="sw-input" type="text" placeholder="0" value="97.91" readonly>
+          <button class="sw-token-btn" onclick="openTokenSelect('to')">
+            <span class="sw-token-icon icon-usdc">$</span>
+            <span class="sw-token-name" id="sw-to-token">USDC</span>
+            <i data-lucide="chevron-down"></i>
+          </button>
+        </div>
+        <div class="sw-balance">
+          <span class="sw-balance-text">Balance: 524.30 USDC</span>
+          <span class="sw-balance-usd">~$97.91</span>
+        </div>
+      </div>
+
+      <!-- Rate Info -->
+      <div class="sw-rate">
+        <span>1 ETH = <span class="sw-rate-value">1,958.28 USDC</span></span>
+        <span style="cursor:pointer" onclick="this.closest('.sw-rate').nextElementSibling.classList.toggle('open')"><i data-lucide="chevron-down" style="width:12px;height:12px"></i></span>
+      </div>
+
+      <!-- Expandable Details -->
+      <div class="sw-details">
+        <div class="sw-detail-row"><span class="sw-detail-key">Price Impact</span><span class="sw-detail-val" style="color:var(--success)">-0.03%</span></div>
+        <div class="sw-detail-row"><span class="sw-detail-key">Min. Received</span><span class="sw-detail-val">97.42 USDC</span></div>
+        <div class="sw-detail-row"><span class="sw-detail-key">Slippage</span><span class="sw-detail-val">0.5% <span class="pill pill-success" style="font-size:8px">Auto</span></span></div>
+        <div class="sw-detail-row"><span class="sw-detail-key">Network Fee</span><span class="sw-detail-val">~$3.82</span></div>
+        <div class="sw-detail-row"><span class="sw-detail-key">Route</span><span class="sw-detail-val">ETH &#x2192; USDC <span class="pill pill-brand" style="font-size:8px">Direct</span></span></div>
+      </div>
+
+      <!-- Swap Button -->
+      <button class="sw-submit" onclick="executeSwap()">
+        <i data-lucide="zap"></i> Swap Tokens
+      </button>
+    </div>
+
+    <div class="sw-footer"><i data-lucide="shield-check"></i> Powered by Uniswap V3</div>
+  </div><!-- /swap-widget -->
+
+  </div><!-- /page-layout -->
+</main>
+
+<script>
+function toggleSwapDetail(rowEl) {
+  var item = rowEl.closest('.swap-tx-item');
+  var wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.swap-tx-item.open').forEach(function(el) { el.classList.remove('open'); });
+  if (!wasOpen) {
+    item.classList.add('open');
+    if (window.lucide) lucide.createIcons();
+  }
+}
+
+function filterSwaps(pair, btn) {
+  var group = btn.closest('.swap-filter-group');
+  group.querySelectorAll('.swap-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function filterStatus(status, btn) {
+  var group = btn.closest('.swap-filter-group');
+  group.querySelectorAll('.swap-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  var pairBtn = document.querySelector('.swap-filter-bar .swap-filter-group:first-child .swap-filter-btn.active');
+  var statusBtn = document.querySelector('.swap-filter-bar .swap-filter-group:nth-child(3) .swap-filter-btn.active');
+  var pair = pairBtn ? pairBtn.textContent.trim() : 'All Pairs';
+  var status = statusBtn ? statusBtn.textContent.trim() : 'All';
+  var searchVal = document.querySelector('.swap-search input').value.toLowerCase();
+
+  document.querySelectorAll('.swap-tx-item').forEach(function(item) {
+    var show = true;
+    if (pair !== 'All Pairs') {
+      var dp = item.dataset.pair;
+      if (pair === 'ETH/USDC' && dp !== 'eth-usdc') show = false;
+      if (pair === 'WBTC/ETH' && dp !== 'wbtc-eth') show = false;
+      if (pair === 'Stables' && dp !== 'stables') show = false;
+    }
+    if (show && status !== 'All') {
+      var ds = item.dataset.status;
+      if (status.indexOf('Success') !== -1 && ds !== 'success') show = false;
+      if (status.indexOf('Failed') !== -1 && ds !== 'failed') show = false;
+    }
+    if (show && searchVal) {
+      var searchData = (item.dataset.search || '').toLowerCase();
+      if (searchData.indexOf(searchVal) === -1) show = false;
+    }
+    item.style.display = show ? '' : 'none';
+  });
+}
+
+function searchSwaps(val) { applyFilters(); }
+
+function switchTab(btn, panelId) {
+  var tabBar = btn.closest('.detail-tabs');
+  tabBar.querySelectorAll('button').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  var detail = btn.closest('.swap-tx-detail');
+  detail.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById(panelId).classList.add('active');
+}
+
+function toggleExpand(btn) {
+  btn.classList.toggle('open');
+  btn.nextElementSibling.classList.toggle('open');
+}
+
+function copyText(text) {
+  if (text) navigator.clipboard.writeText(text);
+}
+
+function toggleTheme() {
+  var html = document.documentElement;
+  var current = html.getAttribute('data-theme');
+  var next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('explorer-theme', next);
+}
+
+(function() {
+  var saved = localStorage.getItem('explorer-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+})();
+
+// ═══ Swap Widget Functions ═══
+var swapTokens = {
+  from: { symbol: 'ETH', icon: 'icon-eth', letter: 'E', balance: 0.3124, price: 1958.28 },
+  to: { symbol: 'USDC', icon: 'icon-usdc', letter: '$', balance: 524.30, price: 1 }
+};
+
+function toggleSwapSettings() {
+  document.getElementById('sw-settings-panel').classList.toggle('open');
+}
+
+function setSlippage(val, btn) {
+  btn.closest('.sw-slippage-row').querySelectorAll('.sw-slip-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  btn.closest('.sw-slippage-row').querySelector('.sw-slip-custom').value = '';
+}
+
+function updateSwapOutput() {
+  var input = document.querySelector('#sw-from .sw-input').value.replace(/,/g, '');
+  var amount = parseFloat(input) || 0;
+  var rate = swapTokens.from.price / swapTokens.to.price;
+  var output = (amount * rate).toFixed(2);
+  document.querySelector('#sw-to .sw-input').value = output > 0 ? Number(output).toLocaleString('en-US', {minimumFractionDigits: 2}) : '';
+  var usdVal = (amount * swapTokens.from.price).toFixed(0);
+  document.querySelector('#sw-from .sw-balance-usd').textContent = '~$' + Number(usdVal).toLocaleString();
+  document.querySelector('#sw-to .sw-balance-usd').textContent = '~$' + Number(usdVal).toLocaleString();
+}
+
+function setMaxBalance() {
+  document.querySelector('#sw-from .sw-input').value = swapTokens.from.balance;
+  updateSwapOutput();
+}
+
+function swapDirection() {
+  var temp = Object.assign({}, swapTokens.from);
+  swapTokens.from = Object.assign({}, swapTokens.to);
+  swapTokens.to = temp;
+  // Update UI
+  var fromIcon = document.querySelector('#sw-from .sw-token-icon');
+  var toIcon = document.querySelector('#sw-to .sw-token-icon');
+  fromIcon.className = 'sw-token-icon ' + swapTokens.from.icon;
+  fromIcon.textContent = swapTokens.from.letter;
+  toIcon.className = 'sw-token-icon ' + swapTokens.to.icon;
+  toIcon.textContent = swapTokens.to.letter;
+  document.getElementById('sw-from-token').textContent = swapTokens.from.symbol;
+  document.getElementById('sw-to-token').textContent = swapTokens.to.symbol;
+  document.querySelector('#sw-from .sw-balance-text').textContent = 'Balance: ' + swapTokens.from.balance.toLocaleString() + ' ' + swapTokens.from.symbol;
+  document.querySelector('#sw-to .sw-balance-text').textContent = 'Balance: ' + swapTokens.to.balance.toLocaleString() + ' ' + swapTokens.to.symbol;
+  var rateVal = swapTokens.from.price / swapTokens.to.price;
+  document.querySelector('.sw-rate-value').textContent = rateVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + swapTokens.to.symbol;
+  document.querySelector('.sw-rate').firstElementChild.innerHTML = '1 ' + swapTokens.from.symbol + ' = <span class="sw-rate-value">' + rateVal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' ' + swapTokens.to.symbol + '</span>';
+  updateSwapOutput();
+}
+
+function openTokenSelect(side) {
+  // Placeholder — in production would open a token selector modal
+}
+
+function executeSwap() {
+  var btn = document.querySelector('.sw-submit');
+  var original = btn.innerHTML;
+  btn.innerHTML = '<i data-lucide="loader" style="width:16px;height:16px;animation:spin 1s linear infinite"></i> Swapping...';
+  btn.style.opacity = '0.7';
+  btn.style.pointerEvents = 'none';
+  if (window.lucide) lucide.createIcons();
+  setTimeout(function() {
+    btn.innerHTML = '<i data-lucide="check-circle" style="width:16px;height:16px"></i> Swap Successful!';
+    btn.style.background = 'linear-gradient(135deg, var(--success), #059669)';
+    if (window.lucide) lucide.createIcons();
+    setTimeout(function() {
+      btn.innerHTML = original;
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+      btn.style.background = '';
+      if (window.lucide) lucide.createIcons();
+    }, 2000);
+  }, 1500);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.lucide) lucide.createIcons();
+});
+</script>
+</body></html>

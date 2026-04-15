@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Block Detail v1 — #24,430,888</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ═══ Design Tokens v3 ═══ */
+:root{
+  --bg-0:#06070b;--bg-1:#0c0d14;--bg-2:#12131c;--bg-3:#191b27;--bg-4:#1f2233;
+  --bg-glass:rgba(18,19,28,0.72);--bg-glass-2:rgba(25,27,39,0.6);
+  --brand:#8000FF;--brand-light:#9933FF;--brand-dim:rgba(128,0,255,0.15);
+  --accent:#00C0FF;--accent-dim:rgba(0,192,255,0.12);
+  --success:#00C060;--success-dim:rgba(0,192,96,0.10);
+  --error:#FF4080;--error-dim:rgba(255,64,128,0.10);
+  --warning:#f59e0b;--warning-dim:rgba(245,158,11,0.10);
+  --info:#0060FF;--info-dim:rgba(0,96,255,0.10);
+  --t1:#f0f0ff;--t2:#8b8ea5;--t3:#4e5068;--t4:#2a2c3e;
+  --link:#0060FF;--border:rgba(255,255,255,0.06);--border-h:rgba(255,255,255,0.12);
+  --r-sm:4px;--r-md:8px;--r-lg:16px;--r-xl:16px;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',-apple-system,sans-serif;
+  --shadow-sm:0 1px 2px rgba(0,0,0,0.3);--shadow-md:0 4px 16px rgba(0,0,0,0.3);
+  --shadow-lg:0 8px 32px rgba(0,0,0,0.4);
+}
+[data-theme="light"]{
+  --bg-0:rgba(0,0,64,0.1);--bg-1:rgba(0,0,64,0.05);--bg-2:#ffffff;--bg-3:rgba(0,0,64,0.03);--bg-4:rgba(0,0,64,0.06);
+  --bg-glass:rgba(255,255,255,0.92);--bg-glass-2:rgba(255,255,255,0.7);
+  --brand:#8000FF;--brand-light:#7000E0;--brand-dim:rgba(128,0,255,0.08);
+  --accent:#00A0D0;--accent-dim:rgba(0,192,255,0.08);
+  --success:#00A050;--success-dim:rgba(0,192,96,0.08);
+  --error:#E03060;--error-dim:rgba(255,64,128,0.08);
+  --warning:#d97706;--warning-dim:rgba(217,119,6,0.08);
+  --info:#0050DD;--info-dim:rgba(0,96,255,0.08);
+  --t1:#000040;--t2:rgba(0,0,64,0.6);--t3:rgba(0,0,64,0.4);--t4:rgba(0,0,64,0.2);
+  --link:#0050DD;--border:rgba(240,243,247,1);--border-h:rgba(205,210,216,1);
+  --shadow-sm:0 1px 3px rgba(0,0,64,0.04);--shadow-md:0 4px 12px rgba(0,0,64,0.06);
+  --shadow-lg:0 8px 16px rgba(0,0,64,0.1);
+}
+
+/* ═══ Base ═══ */
+.theme-toggle svg{width:16px;height:16px;stroke-width:2}
+.search-bar svg.lucide{width:13px;height:13px}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg-0);color:var(--t1);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;letter-spacing:0.01em}
+
+.bg-mesh{display:none}
+.bg-mesh::before{content:'';position:absolute;top:-20%;left:-10%;width:60%;height:60%;background:radial-gradient(ellipse at center,rgba(128,0,255,0.06) 0%,transparent 70%);animation:meshFloat 20s ease-in-out infinite}
+.bg-mesh::after{content:'';position:absolute;bottom:-20%;right:-10%;width:50%;height:50%;background:radial-gradient(ellipse at center,rgba(0,192,255,0.04) 0%,transparent 70%);animation:meshFloat 25s ease-in-out infinite reverse}
+@keyframes meshFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(5%,3%) scale(1.05)}66%{transform:translate(-3%,5%) scale(0.95)}}
+
+/* ═══ Header ═══ */
+.header{position:sticky;top:0;z-index:100;background:rgba(6,7,11,0.8);backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:24px}
+.logo{font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px;letter-spacing:-0.3px}
+.logo-icon{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--brand),var(--accent));box-shadow:0 2px 12px rgba(128,0,255,0.3)}
+.nav{display:flex;gap:1px}
+.nav a{color:var(--t2);text-decoration:none;font-size:13px;font-weight:500;padding:6px 12px;border-radius:8px;transition:all .2s}
+.nav a:hover{color:var(--t1);background:rgba(255,255,255,0.04)}
+.nav a.active{color:var(--t1);background:rgba(255,255,255,0.06)}
+.header-right{display:flex;align-items:center;gap:8px}
+.search-bar{display:flex;align-items:center;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 12px;gap:8px;width:320px;transition:border-color .2s}
+.search-bar:focus-within{border-color:rgba(128,0,255,0.4)}
+.search-bar input{background:none;border:none;outline:none;color:var(--t1);font-size:12px;width:100%;font-family:var(--sans)}
+.search-bar input::placeholder{color:var(--t3)}
+.kbd{font-size:10px;color:var(--t3);background:var(--bg-0);padding:1px 5px;border-radius:3px;border:1px solid var(--border);font-weight:500}
+.net-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:var(--t2);padding:0 10px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--bg-2)}
+.net-dot{width:7px;height:7px;border-radius:50%;background:var(--success);box-shadow:0 0 6px rgba(0,192,96,.5);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.h-btn{height:32px;border-radius:8px;border:none;background:linear-gradient(135deg,var(--brand),#7000E0);color:#fff;font-size:12px;font-weight:600;padding:0 16px;cursor:pointer;font-family:var(--sans);transition:transform .15s,box-shadow .15s}
+.h-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(128,0,255,0.3)}
+.theme-toggle{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--bg-2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;overflow:hidden}
+.theme-toggle:hover{border-color:var(--border-h);transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.theme-toggle .icon-sun,.theme-toggle .icon-moon{position:absolute;transition:transform .3s ease,opacity .3s ease}
+[data-theme="light"] .theme-toggle .icon-moon{transform:translateY(0);opacity:1}
+[data-theme="light"] .theme-toggle .icon-sun{transform:translateY(-30px);opacity:0}
+[data-theme="dark"] .theme-toggle .icon-sun{transform:translateY(0);opacity:1}
+[data-theme="dark"] .theme-toggle .icon-moon{transform:translateY(30px);opacity:0}
+:root .theme-toggle .icon-sun{transform:translateY(0);opacity:1}
+:root .theme-toggle .icon-moon{transform:translateY(30px);opacity:0}
+
+.page{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:24px 32px 100px}
+.breadcrumb{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t3);margin-bottom:20px}
+.breadcrumb a{color:var(--t2);text-decoration:none;transition:color .15s}
+.breadcrumb a:hover{color:var(--brand-light)}
+.pill{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.pill-success{background:var(--success-dim);color:var(--success)}
+.pill-warning{background:var(--warning-dim);color:var(--warning)}
+.pill-error{background:var(--error-dim);color:var(--error)}
+.pill-info{background:var(--info-dim);color:var(--info)}
+.pill-brand{background:var(--brand-dim);color:var(--brand-light)}
+.pill-neutral{background:rgba(255,255,255,0.04);color:var(--t2)}
+
+/* ═══════════════════════════════════════════
+   BLOCK HERO
+   ═══════════════════════════════════════════ */
+.block-hero{
+  position:relative;border-radius:var(--r-xl);overflow:hidden;
+  padding:28px 32px 24px;margin-bottom:16px;
+  border:1px solid var(--border);
+}
+.block-hero::before{
+  content:'';position:absolute;inset:0;opacity:0.6;
+  background:linear-gradient(135deg, rgba(0,192,96,0.08) 0%, rgba(0,192,255,0.05) 50%, rgba(0,192,96,0.03) 100%);
+  background-size:200% 200%;animation:gradientShift 8s ease-in-out infinite;
+}
+@keyframes gradientShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+.block-hero-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-bottom:20px}
+.block-hero-left{display:flex;align-items:center;gap:14px}
+.block-icon{
+  width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#00C060,#00A050);box-shadow:0 0 24px rgba(0,192,96,0.35);
+}
+.block-icon svg.lucide{width:24px;height:24px;stroke-width:2.5;color:#fff}
+.block-hero-title h2{font-size:22px;font-weight:900;letter-spacing:-0.5px;display:flex;align-items:baseline;gap:8px}
+.block-hero-title h2 span{font-family:var(--mono);font-size:20px}
+.block-hero-title p{font-size:12px;color:var(--t2);margin-top:2px}
+.block-hero-badges{display:flex;gap:6px;align-items:center}
+.block-badge{
+  font-size:10px;font-weight:600;padding:4px 12px;border-radius:20px;backdrop-filter:blur(8px);
+  background:rgba(0,192,96,0.12);color:var(--success);border:1px solid rgba(0,192,96,0.15);
+}
+
+/* 블록 네비게이션 */
+.block-nav{display:flex;align-items:center;gap:6px;position:relative;z-index:1}
+.block-nav-btn{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--border);
+  background:var(--bg-glass-2);backdrop-filter:blur(8px);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--t2);transition:all .15s;
+}
+.block-nav-btn:hover{color:var(--t1);border-color:var(--border-h);transform:translateY(-1px)}
+.block-nav-btn svg.lucide{width:16px;height:16px;stroke-width:2.5}
+
+/* 히어로 미니 메트릭 */
+.block-hero-metrics{
+  display:flex;align-items:center;gap:20px;position:relative;z-index:1;
+  padding-top:16px;border-top:1px solid rgba(255,255,255,0.04);
+}
+.block-hero-metric{display:flex;align-items:center;gap:8px}
+.block-hero-metric-icon{
+  width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.04);
+}
+.block-hero-metric-icon svg.lucide{width:14px;height:14px;stroke-width:2;color:var(--t2)}
+.block-hero-metric-text .bhm-val{font-size:16px;font-weight:800;letter-spacing:-0.3px}
+.block-hero-metric-text .bhm-label{font-size:10px;color:var(--t3);font-weight:500}
+
+/* ═══════════════════════════════════════════
+   INSIGHT BUBBLE
+   ═══════════════════════════════════════════ */
+.easy-bubble{margin-bottom:16px;position:relative}
+.easy-bubble-inner{
+  padding:18px 22px;border-radius:var(--r-lg);
+  background:linear-gradient(135deg,rgba(128,0,255,0.06),rgba(0,192,255,0.04));
+  border:1px solid rgba(128,0,255,0.1);position:relative;
+}
+.easy-bubble-inner::before{
+  content:'';position:absolute;top:-6px;left:28px;width:12px;height:12px;rotate:45deg;
+  background:linear-gradient(135deg,rgba(128,0,255,0.06),rgba(0,192,255,0.04));
+  border-left:1px solid rgba(128,0,255,0.1);border-top:1px solid rgba(128,0,255,0.1);
+}
+.easy-label{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--brand-light);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.easy-label .ai-dot{width:6px;height:6px;border-radius:50%;background:var(--brand-light);animation:pulse 1.5s ease-in-out infinite}
+.easy-bubble p{font-size:13px;color:var(--t1);line-height:1.7}
+.easy-bubble .hl{color:var(--brand-light);font-weight:700}
+
+/* ═══════════════════════════════════════════
+   TOP HORIZONTAL — Composition + Validator
+   ═══════════════════════════════════════════ */
+.top-grid{display:grid;grid-template-columns:1fr 0.45fr;gap:12px;margin-bottom:16px}
+
+/* Block Composition DNA */
+.comp-card{
+  background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:24px;overflow:hidden;transition:border-color .2s;
+}
+.comp-card:hover{border-color:var(--border-h)}
+.comp-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;letter-spacing:-0.2px;margin-bottom:16px}
+.comp-title svg.lucide{width:15px;height:15px;opacity:0.6}
+
+/* DNA Bar */
+.dna-bar{
+  height:36px;border-radius:8px;overflow:hidden;display:flex;
+  margin-bottom:14px;position:relative;
+}
+.dna-seg{
+  height:100%;transition:all .3s ease;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:rgba(255,255,255,0.9);
+  cursor:pointer;
+}
+.dna-seg:hover{filter:brightness(1.15)}
+.dna-seg.seg-transfer{background:#0060FF}
+.dna-seg.seg-swap{background:#8000FF}
+.dna-seg.seg-approve{background:#f59e0b}
+.dna-seg.seg-other{background:#64748b}
+.dna-seg.seg-bridge{background:#00C060}
+
+/* DNA 범례 */
+.dna-legend{display:flex;flex-wrap:wrap;gap:12px}
+.dna-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--t2)}
+.dna-legend-dot{width:8px;height:8px;border-radius:3px;flex-shrink:0}
+.dna-legend-count{font-weight:700;color:var(--t1);font-family:var(--mono);font-size:11px}
+.dna-legend-pct{font-size:10px;color:var(--t3)}
+
+/* Gas Utilization */
+.gas-section{margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.gas-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.gas-title{font-size:12px;font-weight:600;color:var(--t2)}
+.gas-pct{font-size:14px;font-weight:800;letter-spacing:-0.3px}
+.gas-bar-wrap{height:12px;border-radius:8px;background:var(--bg-4);overflow:hidden;position:relative}
+.gas-bar-fill{
+  height:100%;border-radius:8px;
+  background:linear-gradient(90deg,#00C060,#00C0FF);
+  transition:width .6s ease;position:relative;
+}
+.gas-bar-fill::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:4px;
+  background:rgba(255,255,255,0.4);border-radius:0 8px 8px 0;
+}
+.gas-labels{display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--t3);font-family:var(--mono)}
+
+/* Validator Card */
+.validator-card{
+  background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-xl);
+  padding:24px;display:flex;flex-direction:column;transition:border-color .2s;
+}
+.validator-card:hover{border-color:var(--border-h)}
+.validator-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;letter-spacing:-0.2px;margin-bottom:16px}
+.validator-title svg.lucide{width:15px;height:15px;opacity:0.6}
+.validator-info{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.validator-avatar{
+  width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:800;color:#fff;flex-shrink:0;
+  background:linear-gradient(135deg,var(--brand),#7000E0);border:3px solid var(--bg-4);
+}
+.validator-name{font-size:16px;font-weight:800;letter-spacing:-0.3px}
+.validator-addr{
+  font-family:var(--mono);font-size:11px;color:var(--t3);margin-top:2px;
+  cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+  padding:3px 8px;border-radius:6px;background:rgba(0,0,0,0.15);transition:background .15s;
+}
+.validator-addr:hover{background:rgba(0,0,0,0.3)}
+.validator-addr svg.lucide{width:10px;height:10px;opacity:0.5}
+
+.validator-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+.v-stat{padding:10px 12px;border-radius:var(--r-sm);background:var(--bg-3);border:1px solid rgba(255,255,255,0.03)}
+.v-stat-label{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px}
+.v-stat-val{font-size:16px;font-weight:800;letter-spacing:-0.3px}
+.v-stat-sub{font-size:10px;color:var(--t3)}
+
+/* ═══════════════════════════════════════════
+   METRICS GRID
+   ═══════════════════════════════════════════ */
+.metrics-card{
+  background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-xl);
+  overflow:hidden;margin-bottom:16px;transition:border-color .2s;
+}
+.metrics-card:hover{border-color:var(--border-h)}
+.metrics-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px 14px}
+.metrics-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px;letter-spacing:-0.2px}
+.metrics-title svg.lucide{width:15px;height:15px;opacity:0.6}
+.m-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px 16px}
+.m-item{padding:14px 16px;border-radius:var(--r-md);background:var(--bg-3);border:1px solid rgba(255,255,255,0.03);transition:border-color .2s}
+.m-item:hover{border-color:var(--border-h)}
+.m-label{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.m-value{font-size:16px;font-weight:800;letter-spacing:-0.5px;margin-bottom:2px}
+.m-sub{font-size:10px;color:var(--t3);font-weight:500}
+.m-tag{margin-top:4px}
+
+/* ═══════════════════════════════════════════
+   TECHNICAL DETAILS
+   ═══════════════════════════════════════════ */
+.tech-card{
+  background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-xl);
+  overflow:hidden;margin-bottom:16px;
+}
+.tech-header{
+  display:flex;align-items:center;justify-content:space-between;padding:16px 24px;
+  cursor:pointer;transition:background .15s;
+}
+.tech-header:hover{background:rgba(255,255,255,0.015)}
+.tech-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
+.tech-title svg.lucide{width:15px;height:15px;opacity:0.6}
+.tech-toggle{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--t3);transition:color .15s}
+.tech-toggle svg.lucide{width:14px;height:14px;transition:transform .2s}
+.tech-header.open .tech-toggle svg.lucide{transform:rotate(180deg)}
+.tech-body{display:none;padding:0 24px 16px}
+.tech-body.open{display:block}
+.tech-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;transition:background .15s}
+.tech-row+.tech-row{border-top:1px solid var(--border)}
+.tech-key{font-size:12px;color:var(--t2);font-weight:500}
+.tech-val{font-family:var(--mono);font-size:11px;color:var(--t1);text-align:right;max-width:60%;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:6px}
+.tech-copy{border:none;background:none;cursor:pointer;color:var(--t3);padding:2px;transition:color .15s;display:inline-flex}
+.tech-copy:hover{color:var(--brand-light)}
+.tech-copy svg.lucide{width:11px;height:11px}
+
+/* ═══════════════════════════════════════════
+   TRANSACTIONS IN BLOCK
+   ═══════════════════════════════════════════ */
+.txs-card{
+  background:var(--bg-2);border:1px solid var(--border);border-radius:var(--r-xl);
+  overflow:hidden;
+}
+.txs-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px 14px}
+.txs-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:7px}
+.txs-title svg.lucide{width:15px;height:15px;opacity:0.6}
+.txs-count{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--brand-dim);color:var(--brand-light)}
+
+.method-tag{font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.method-tag svg.lucide{width:12px;height:12px}
+.tag-transfer{background:rgba(0,96,255,0.12);color:#0060FF;border:1px solid rgba(0,96,255,0.15)}
+.tag-swap{background:rgba(128,0,255,0.12);color:#8000FF;border:1px solid rgba(128,0,255,0.15)}
+.tag-bridge{background:rgba(0,192,96,0.12);color:#00C060;border:1px solid rgba(0,192,96,0.15)}
+.tag-approve{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.15)}
+
+.mini-tx{
+  display:flex;align-items:center;gap:12px;padding:12px 24px;
+  border-top:1px solid var(--border);transition:background .15s;cursor:pointer;
+}
+.mini-tx:hover{background:rgba(128,0,255,0.03)}
+.mini-tx-status{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.mini-tx-status svg.lucide{width:12px;height:12px;stroke-width:3}
+.mini-tx-status.ok{background:var(--success-dim);color:var(--success)}
+.mini-tx-status.fail{background:var(--error-dim);color:var(--error)}
+.mini-tx-info{flex:1;min-width:0}
+.mini-tx-summary{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-tx-addr{font-size:10px;color:var(--t3);font-family:var(--mono);margin-top:1px}
+.mini-tx-value{text-align:right;white-space:nowrap}
+.mini-tx-val{font-size:12px;font-weight:700;font-family:var(--mono);letter-spacing:-0.3px}
+.mini-tx-usd{font-size:10px;color:var(--t3)}
+
+.txs-footer{
+  display:flex;align-items:center;justify-content:center;padding:14px;
+  border-top:1px solid var(--border);
+}
+.txs-footer a{
+  font-size:12px;font-weight:600;color:var(--brand-light);text-decoration:none;
+  display:flex;align-items:center;gap:5px;transition:opacity .15s;
+}
+.txs-footer a:hover{opacity:0.8}
+.txs-footer a svg.lucide{width:14px;height:14px}
+
+/* ═══ Light Theme ═══ */
+[data-theme="light"] body{background:var(--bg-0)}
+[data-theme="light"] .bg-mesh::before{background:radial-gradient(ellipse at center,rgba(128,0,255,0.04) 0%,transparent 70%)}
+[data-theme="light"] .bg-mesh::after{background:radial-gradient(ellipse at center,rgba(0,192,255,0.03) 0%,transparent 70%)}
+[data-theme="light"] .header{background:rgb(255,255,255);backdrop-filter:none;height:72px;border-bottom:1px solid #F0F3F7}
+[data-theme="light"] .search-bar{background:var(--bg-3);border-radius:8px;border:1px solid #CDD2D8}
+[data-theme="light"] .kbd{background:var(--bg-4);border-color:var(--border);color:var(--t3)}
+[data-theme="light"] .net-badge{background:var(--bg-2)}
+[data-theme="light"] .block-hero{background:var(--bg-2);box-shadow:var(--shadow-md)}
+[data-theme="light"] .block-hero::before{background:linear-gradient(135deg,rgba(0,192,96,0.06) 0%,rgba(0,192,255,0.03) 50%,rgba(0,192,96,0.02) 100%)}
+[data-theme="light"] .block-hero-metrics{border-top-color:rgba(0,0,0,0.06)}
+[data-theme="light"] .block-hero-metric-icon{background:rgba(0,0,0,0.04)}
+[data-theme="light"] .block-nav-btn{background:rgba(0,0,0,0.03);backdrop-filter:none}
+[data-theme="light"] .easy-bubble-inner{background:linear-gradient(135deg,rgba(128,0,255,0.04),rgba(0,192,255,0.03));border-color:rgba(128,0,255,0.1)}
+[data-theme="light"] .easy-bubble-inner::before{background:linear-gradient(135deg,rgba(128,0,255,0.04),rgba(0,192,255,0.03));border-left-color:rgba(128,0,255,0.1);border-top-color:rgba(128,0,255,0.1)}
+[data-theme="light"] .comp-card,.validator-card,.metrics-card,.tech-card,.txs-card{background:var(--bg-2);box-shadow:var(--shadow-sm)}
+[data-theme="light"] .m-item,.v-stat{background:var(--bg-3);border-color:rgba(0,0,0,0.04)}
+[data-theme="light"] .gas-bar-wrap{background:var(--bg-4)}
+[data-theme="light"] .validator-addr{background:rgba(0,0,0,0.04)}
+[data-theme="light"] .validator-addr:hover{background:rgba(0,0,0,0.08)}
+[data-theme="light"] .validator-avatar{border-color:var(--bg-3)}
+[data-theme="light"] .tech-header:hover{background:rgba(0,0,0,0.02)}
+[data-theme="light"] .tech-row+.tech-row{border-top-color:rgba(0,0,0,0.06)}
+[data-theme="light"] .mini-tx:hover{background:rgba(128,0,255,0.03)}
+[data-theme="light"] .block-badge{background:rgba(0,192,96,0.1);color:var(--success);border-color:rgba(0,192,96,0.15)}
+[data-theme="light"] .pill-neutral{background:rgba(0,0,0,0.04);color:var(--t2)}
+[data-theme="light"] .dna-seg{color:rgba(255,255,255,0.95)}
+
+/* ═══ Responsive ═══ */
+@media(max-width:1100px){
+  .top-grid{grid-template-columns:1fr}
+  .m-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:700px){
+  .page{padding:16px}
+  .search-bar,.nav,.net-badge{display:none}
+  .header{padding:0 16px}
+  .block-hero{padding:20px}
+  .block-hero-metrics{flex-wrap:wrap;gap:12px}
+  .m-grid{grid-template-columns:1fr 1fr}
+  .dna-bar{height:28px}
+  .tech-val{max-width:50%;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<header class="header">
+  <div class="header-left">
+    <div class="logo"><div class="logo-icon">E</div>Explorer</div>
+    <nav class="nav">
+      <a href="transactions.html">Transactions</a><a href="swap.html">Swap</a><a href="block-detail.html" class="active">Blocks</a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <div class="search-bar"><i data-lucide="search"></i><input placeholder="Search by address, tx hash, block, token..."><span class="kbd">&#x2318;K</span></div>
+    <div class="net-badge"><span class="net-dot"></span>Ethereum Mainnet</div>
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme"><span class="icon-sun"><i data-lucide="sun"></i></span><span class="icon-moon"><i data-lucide="moon"></i></span></button>
+    <button class="h-btn">Connect Wallet</button>
+  </div>
+</header>
+
+<main class="page">
+  <div class="breadcrumb"><a href="#">Home</a><span>›</span><a href="#">Blocks</a><span>›</span><span style="color:var(--t2)">#24,430,888</span></div>
+
+  <!-- ═══ Block Hero ═══ -->
+  <div class="block-hero">
+    <div class="block-hero-top">
+      <div class="block-hero-left">
+        <div class="block-icon"><i data-lucide="box"></i></div>
+        <div class="block-hero-title">
+          <h2>Block <span>#24,430,888</span></h2>
+          <p>2026.02.21 13:23:12 UTC · 3 minutes ago</p>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="block-hero-badges">
+          <span class="block-badge">Finalized</span>
+          <span class="block-badge">Epoch 234,881</span>
+        </div>
+        <div class="block-nav">
+          <button class="block-nav-btn" title="Previous Block"><i data-lucide="chevron-left"></i></button>
+          <button class="block-nav-btn" title="Next Block"><i data-lucide="chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="block-hero-metrics">
+      <div class="block-hero-metric">
+        <div class="block-hero-metric-icon"><i data-lucide="layers"></i></div>
+        <div class="block-hero-metric-text"><div class="bhm-val">187 Transactions</div><div class="bhm-label">in this block</div></div>
+      </div>
+      <div class="block-hero-metric">
+        <div class="block-hero-metric-icon"><i data-lucide="flame"></i></div>
+        <div class="block-hero-metric-text"><div class="bhm-val">0.125 ETH Burnt</div><div class="bhm-label">$243.49</div></div>
+      </div>
+      <div class="block-hero-metric">
+        <div class="block-hero-metric-icon"><i data-lucide="coins"></i></div>
+        <div class="block-hero-metric-text"><div class="bhm-val">0.047 ETH Reward</div><div class="bhm-label">$91.57 in tips</div></div>
+      </div>
+      <div class="block-hero-metric">
+        <div class="block-hero-metric-icon"><i data-lucide="gauge"></i></div>
+        <div class="block-hero-metric-text"><div class="bhm-val">50.8% Full</div><div class="bhm-label"><span class="pill pill-success">Normal</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Insight Bubble ═══ -->
+  <div class="easy-bubble">
+    <div class="easy-bubble-inner">
+      <div class="easy-label"><span class="ai-dot"></span>In Simple Terms</div>
+      <p>This block was validated by <span class="hl">Lido</span> about 3 minutes ago and is now <span class="hl">finalized</span> — meaning it can never be changed. It contains <span class="hl">187 transactions</span> worth approximately $1.2M in total value. Mostly ETH transfers (42%) and DEX swaps (31%). The block used about half its capacity and burned <span class="hl">0.125 ETH ($243)</span> in base fees — this ETH is permanently removed from supply.</p>
+    </div>
+  </div>
+
+  <!-- ═══ Top Grid: Composition + Validator ═══ -->
+  <div class="top-grid">
+    <!-- Block Composition -->
+    <div class="comp-card">
+      <div class="comp-title"><i data-lucide="dna"></i>Block Composition</div>
+
+      <!-- DNA Bar -->
+      <div class="dna-bar">
+        <div class="dna-seg seg-transfer" style="width:42%" title="Transfer: 78 txs (42%)">42%</div>
+        <div class="dna-seg seg-swap" style="width:31%" title="Swap: 58 txs (31%)">31%</div>
+        <div class="dna-seg seg-approve" style="width:13%" title="Approve: 24 txs (13%)">13%</div>
+        <div class="dna-seg seg-other" style="width:8%" title="Other: 15 txs (8%)"></div>
+        <div class="dna-seg seg-bridge" style="width:6%" title="Bridge: 12 txs (6%)"></div>
+      </div>
+
+      <div class="dna-legend">
+        <div class="dna-legend-item"><span class="dna-legend-dot" style="background:#0060FF"></span>Transfer <span class="dna-legend-count">78</span> <span class="dna-legend-pct">(42%)</span></div>
+        <div class="dna-legend-item"><span class="dna-legend-dot" style="background:#8000FF"></span>Swap <span class="dna-legend-count">58</span> <span class="dna-legend-pct">(31%)</span></div>
+        <div class="dna-legend-item"><span class="dna-legend-dot" style="background:#f59e0b"></span>Approve <span class="dna-legend-count">24</span> <span class="dna-legend-pct">(13%)</span></div>
+        <div class="dna-legend-item"><span class="dna-legend-dot" style="background:#64748b"></span>Other <span class="dna-legend-count">15</span> <span class="dna-legend-pct">(8%)</span></div>
+        <div class="dna-legend-item"><span class="dna-legend-dot" style="background:#00C060"></span>Bridge <span class="dna-legend-count">12</span> <span class="dna-legend-pct">(6%)</span></div>
+      </div>
+
+      <!-- Gas Utilization -->
+      <div class="gas-section">
+        <div class="gas-header">
+          <span class="gas-title">Gas Utilization</span>
+          <span class="gas-pct">50.8%</span>
+        </div>
+        <div class="gas-bar-wrap">
+          <div class="gas-bar-fill" style="width:50.8%"></div>
+        </div>
+        <div class="gas-labels">
+          <span>Used: 15,234,567</span>
+          <span>Limit: 30,000,000</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Validator -->
+    <div class="validator-card">
+      <div class="validator-title"><i data-lucide="shield-check"></i>Validator</div>
+      <div class="validator-info">
+        <div class="validator-avatar">L</div>
+        <div>
+          <div class="validator-name">Lido</div>
+          <span class="validator-addr" onclick="copyText('0x388c818CA8B9251b393131C08a736A67ccB19297')">0x388c…9097 <i data-lucide="copy"></i></span>
+        </div>
+      </div>
+      <div class="validator-stats">
+        <div class="v-stat">
+          <div class="v-stat-label">Block Reward</div>
+          <div class="v-stat-val">0.047 ETH</div>
+          <div class="v-stat-sub">$91.57 in tips</div>
+        </div>
+        <div class="v-stat">
+          <div class="v-stat-label">Burnt Fees</div>
+          <div class="v-stat-val" style="color:var(--warning)">0.125 ETH</div>
+          <div class="v-stat-sub">$243.49 removed</div>
+        </div>
+        <div class="v-stat">
+          <div class="v-stat-label">Base Fee</div>
+          <div class="v-stat-val">8.2 Gwei</div>
+          <div class="v-stat-sub"><span class="pill pill-success">Low</span></div>
+        </div>
+        <div class="v-stat">
+          <div class="v-stat-label">Extra Data</div>
+          <div class="v-stat-val" style="font-size:11px">Lido</div>
+          <div class="v-stat-sub">UTF-8 decoded</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Key Metrics ═══ -->
+  <div class="metrics-card">
+    <div class="metrics-header">
+      <span class="metrics-title"><i data-lucide="bar-chart-3"></i>Block Metrics</span>
+    </div>
+    <div class="m-grid">
+      <div class="m-item">
+        <div class="m-label">Transactions</div>
+        <div class="m-value">187</div>
+        <div class="m-sub">5 failed (2.7%)</div>
+      </div>
+      <div class="m-item">
+        <div class="m-label">Gas Used</div>
+        <div class="m-value">15.23M</div>
+        <div class="m-sub">50.8% of 30M limit</div>
+        <div class="m-tag"><span class="pill pill-success">Half Full</span></div>
+      </div>
+      <div class="m-item">
+        <div class="m-label">Base Fee</div>
+        <div class="m-value">8.2 Gwei</div>
+        <div class="m-sub">~$0.14 avg tx fee</div>
+        <div class="m-tag"><span class="pill pill-success">Low</span></div>
+      </div>
+      <div class="m-item">
+        <div class="m-label">Burnt Fees</div>
+        <div class="m-value" style="color:var(--warning)">0.125 ETH</div>
+        <div class="m-sub">$243.49 permanently removed</div>
+      </div>
+      <div class="m-item">
+        <div class="m-label">Block Reward</div>
+        <div class="m-value" style="color:var(--success)">0.047 ETH</div>
+        <div class="m-sub">$91.57 (tips only, no static reward)</div>
+      </div>
+      <div class="m-item">
+        <div class="m-label">Block Size</div>
+        <div class="m-value">84.2 KB</div>
+        <div class="m-sub">Normal size</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Technical Details ═══ -->
+  <div class="tech-card">
+    <div class="tech-header" onclick="toggleTech(this)">
+      <span class="tech-title"><i data-lucide="code-2"></i>Technical Details</span>
+      <span class="tech-toggle">Show <i data-lucide="chevron-down"></i></span>
+    </div>
+    <div class="tech-body" id="techBody">
+      <div class="tech-row"><span class="tech-key">Block Hash</span><span class="tech-val">0x9a4c8f2e1d3b5a7c9e0f2d4b6a8c0e2f4d6b8a0c <button class="tech-copy" onclick="copyText('0x9a4c8f2e1d3b5a7c9e0f2d4b6a8c0e2f4d6b8a0c')"><i data-lucide="copy"></i></button></span></div>
+      <div class="tech-row"><span class="tech-key">Parent Hash</span><span class="tech-val">0x7b3d5e9f1a2c4d6e8f0a2b4c6d8e0f1a3b5c7d9e <button class="tech-copy" onclick="copyText('0x7b3d5e9f1a2c4d6e8f0a2b4c6d8e0f1a3b5c7d9e')"><i data-lucide="copy"></i></button></span></div>
+      <div class="tech-row"><span class="tech-key">State Root</span><span class="tech-val">0x2e4f6a8c0d2b4e6f8a0c2d4e6a8b0c2d4f6a8c0e <button class="tech-copy" onclick="copyText('0x2e4f6a8c0d2b4e6f8a0c2d4e6a8b0c2d4f6a8c0e')"><i data-lucide="copy"></i></button></span></div>
+      <div class="tech-row"><span class="tech-key">Receipts Root</span><span class="tech-val">0x5c7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b1c3d <button class="tech-copy" onclick="copyText('0x5c7d9e1f3a5b7c9d1e3f5a7b9c1d3e5f7a9b1c3d')"><i data-lucide="copy"></i></button></span></div>
+      <div class="tech-row"><span class="tech-key">Nonce</span><span class="tech-val">0x0000000000000000</span></div>
+      <div class="tech-row"><span class="tech-key">Difficulty</span><span class="tech-val">0 (Proof of Stake)</span></div>
+      <div class="tech-row"><span class="tech-key">Total Difficulty</span><span class="tech-val">58,750,003,716,598,352,816,469</span></div>
+      <div class="tech-row"><span class="tech-key">Slot</span><span class="tech-val">7,516,288</span></div>
+    </div>
+  </div>
+
+  <!-- ═══ Transactions in Block ═══ -->
+  <div class="txs-card">
+    <div class="txs-header">
+      <span class="txs-title"><i data-lucide="list"></i>Transactions in this Block</span>
+      <span class="txs-count">187 total</span>
+    </div>
+
+    <div class="mini-tx">
+      <div class="mini-tx-status ok"><i data-lucide="check"></i></div>
+      <span class="method-tag tag-transfer"><i data-lucide="arrow-up-right"></i>Transfer</span>
+      <div class="mini-tx-info">
+        <div class="mini-tx-summary">Sent 50 ETH from Binance</div>
+        <div class="mini-tx-addr">0x1a2b…3c4d → 0x3c4d…5e6f</div>
+      </div>
+      <div class="mini-tx-value"><div class="mini-tx-val">50 ETH</div><div class="mini-tx-usd">$97,396</div></div>
+    </div>
+    <div class="mini-tx">
+      <div class="mini-tx-status ok"><i data-lucide="check"></i></div>
+      <span class="method-tag tag-swap"><i data-lucide="arrow-left-right"></i>Swap</span>
+      <div class="mini-tx-info">
+        <div class="mini-tx-summary">Swapped 10,000 DAI for 9,985 USDC on Curve</div>
+        <div class="mini-tx-addr">0xef56…a789 → 0x7890…bcde (Curve)</div>
+      </div>
+      <div class="mini-tx-value"><div class="mini-tx-val">9,985 USDC</div><div class="mini-tx-usd">$9,985.00</div></div>
+    </div>
+    <div class="mini-tx">
+      <div class="mini-tx-status ok"><i data-lucide="check"></i></div>
+      <span class="method-tag tag-transfer"><i data-lucide="arrow-up-right"></i>Transfer</span>
+      <div class="mini-tx-info">
+        <div class="mini-tx-summary">Sent 2.5 ETH</div>
+        <div class="mini-tx-addr">0xab12…cd34 (OpenSea) → 0xcd34…ef56</div>
+      </div>
+      <div class="mini-tx-value"><div class="mini-tx-val">2.5 ETH</div><div class="mini-tx-usd">$4,869.80</div></div>
+    </div>
+    <div class="mini-tx">
+      <div class="mini-tx-status ok"><i data-lucide="check"></i></div>
+      <span class="method-tag tag-swap"><i data-lucide="arrow-left-right"></i>Swap</span>
+      <div class="mini-tx-info">
+        <div class="mini-tx-summary">Swapped 1,500 USDC for 0.82 ETH on Uniswap</div>
+        <div class="mini-tx-addr">0x7f2c…a1b3 (vitalik.eth) → 0x6b17…c4d5 (Uniswap V3)</div>
+      </div>
+      <div class="mini-tx-value"><div class="mini-tx-val">0.82 ETH</div><div class="mini-tx-usd">$1,596.90</div></div>
+    </div>
+    <div class="mini-tx">
+      <div class="mini-tx-status fail"><i data-lucide="x"></i></div>
+      <span class="method-tag tag-transfer"><i data-lucide="arrow-up-right"></i>Transfer</span>
+      <div class="mini-tx-info">
+        <div class="mini-tx-summary" style="color:var(--error)">Failed: Out of Gas</div>
+        <div class="mini-tx-addr">0xd2e1…f3a2 → 0xf3a2…b4c5</div>
+      </div>
+      <div class="mini-tx-value"><div class="mini-tx-val" style="opacity:0.5;text-decoration:line-through">0 ETH</div><div class="mini-tx-usd">Fee $0.003</div></div>
+    </div>
+
+    <div class="txs-footer">
+      <a href="#">View all 187 transactions <i data-lucide="arrow-right"></i></a>
+    </div>
+  </div>
+</main>
+
+<script>
+function toggleTheme(){
+  const html=document.documentElement;
+  const next=html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  localStorage.setItem('explorer-theme',next);
+}
+(function(){const s=localStorage.getItem('explorer-theme');if(s)document.documentElement.setAttribute('data-theme',s)})();
+
+function copyText(text){
+  if(!text)return;
+  navigator.clipboard.writeText(text);
+  const t=document.createElement('div');
+  t.textContent='Copied!';
+  t.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:var(--brand);color:#fff;padding:6px 16px;border-radius:8px;font-size:12px;font-weight:600;z-index:9999;animation:fadeOut 1.5s ease forwards;font-family:var(--sans)';
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),1500);
+}
+
+function toggleTech(header){
+  header.classList.toggle('open');
+  const body=header.nextElementSibling;
+  body.classList.toggle('open');
+  header.querySelector('.tech-toggle').textContent='';
+  const label=body.classList.contains('open')?'Hide':'Show';
+  header.querySelector('.tech-toggle').innerHTML=label+' <i data-lucide="chevron-down"></i>';
+  if(window.lucide)lucide.createIcons();
+}
+
+document.addEventListener('DOMContentLoaded',function(){if(window.lucide)lucide.createIcons()});
+</script>
+<style>@keyframes fadeOut{0%{opacity:1;transform:translateX(-50%) translateY(0)}70%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-10px)}}</style>
+</body>
+</html>
